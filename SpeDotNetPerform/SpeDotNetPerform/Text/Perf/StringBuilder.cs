@@ -1,7 +1,7 @@
 ﻿using System.Performance;
 
 namespace System.Text.Perf {
-    public class StringBuilder : PerformanceHandler<Text.StringBuilder> {
+    public class StringBuilder : PerformanceBase<Text.StringBuilder> {
         /// <summary>
         /// Initializes a new instance of the System.Text.StringBuilder class.
         /// </summary>
