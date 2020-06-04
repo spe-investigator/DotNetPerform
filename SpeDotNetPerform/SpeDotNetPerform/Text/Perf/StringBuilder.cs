@@ -7,7 +7,7 @@ namespace System.Text.Perf {
         /// </summary>
         /// <param name="characteristic"></param>
         /// <param name="poolSize"></param>
-        public StringBuilder(PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, int poolSize = 10) : base(characteristic, poolSize, new Microsoft.Extensions.ObjectPool.StringBuilderPooledObjectPolicy()) {
+        public StringBuilder(PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, int poolSize = 10) : base(characteristic, poolSize, string.Empty, new Microsoft.Extensions.ObjectPool.StringBuilderPooledObjectPolicy()) {
         }
 
         //
@@ -22,7 +22,7 @@ namespace System.Text.Perf {
         // Exceptions:
         //   T:System.ArgumentOutOfRangeException:
         //     capacity is less than zero.
-        public StringBuilder(int capacity, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, int poolSize = 10) : base(characteristic, poolSize, new Microsoft.Extensions.ObjectPool.StringBuilderPooledObjectPolicy() {
+        public StringBuilder(int capacity, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, int poolSize = 10) : base(characteristic, poolSize, string.Empty, new Microsoft.Extensions.ObjectPool.StringBuilderPooledObjectPolicy() {
             InitialCapacity = capacity
         }) {
         }
@@ -43,7 +43,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     maxCapacity is less than one, capacity is less than zero, or capacity is greater
         //     than maxCapacity.
-        public StringBuilder(int capacity, int maxCapacity, PerformanceCharacteristic characteristic, int poolSize = 10) : base(characteristic, poolSize, new Microsoft.Extensions.ObjectPool.StringBuilderPooledObjectPolicy() {
+        public StringBuilder(int capacity, int maxCapacity, PerformanceCharacteristic characteristic, int poolSize = 10) : base(characteristic, poolSize, string.Empty, new Microsoft.Extensions.ObjectPool.StringBuilderPooledObjectPolicy() {
             InitialCapacity = capacity,
             MaximumRetainedCapacity = maxCapacity
         }) {

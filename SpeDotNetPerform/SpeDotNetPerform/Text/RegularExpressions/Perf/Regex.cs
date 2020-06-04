@@ -7,7 +7,6 @@ namespace System.Text.RegularExpressions.Perf {
     /// Represents an immutable regular expression.
     /// </summary>
     public class Regex : PerformanceBase<System.Text.RegularExpressions.Regex> {
-
         /// <summary>
         /// Initializes a new instance of the System.Text.RegularExpressions.Regex class
         ///     for the specified regular expression.
@@ -15,9 +14,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <param name="pattern">The regular expression pattern to match.</param>
         /// <exception cref="System.ArgumentException">A regular expression parsing error occurred.</exception>
         /// <exception cref="System.ArgumentNullException">pattern is null.</exception>
-        public Regex(string pattern, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, int poolSize = 10) : base(PerformanceCharacteristic.ThreadStatic, 0, string.Empty, new RegexPooledObjectPolicy() {
-            Pattern = pattern
-        }) {
+        public Regex(string pattern, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey, new RegexPooledObjectPolicy(pattern)/*, (pooledObjectPolicy, maximumRetention) => new */) {
         }
 
         /// <summary>
@@ -29,10 +26,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentException">A regular expression parsing error occurred.</exception>
         /// <exception cref="System.ArgumentNullException">pattern is null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException:">options contains an invalid flag.</exception>
-        public Regex(string pattern, RegexOptions options, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, int poolSize = 10) : base(characteristic, poolSize, string.Empty, new RegexPooledObjectPolicy() {
-            Pattern = pattern,
-            options = options
-        }) {
+        public Regex(string pattern, RegexOptions options, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey, new RegexPooledObjectPolicy(pattern, options)/*, (pooledObjectPolicy, maximumRetention) => new */) {
         }
 
         /// <summary>
@@ -49,11 +43,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentOutOfRangeException:">
         /// options is not a valid System.Text.RegularExpressions.RegexOptions value. -or- matchTimeout is negative, zero, or greater than approximately 24 days.
         /// </exception>
-        public Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, int poolSize = 10) : base(characteristic, poolSize, new RegexPooledObjectPolicy() {
-            Pattern = pattern,
-            options = options,
-            matchTimeout = matchTimeout
-        }) {
+        public Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey, new RegexPooledObjectPolicy(pattern, options, matchTimeout)/*, (pooledObjectPolicy, maximumRetention) => new */) {
         }
 
         //
@@ -610,7 +600,7 @@ namespace System.Text.RegularExpressions.Perf {
             
             public TimeSpan? MatchTimeout { get; }
 
-            public RegexPooledObjectPolicy(string pattern, RegexOptions options, TimeSpan matchTimeout, bool rightToLeft) {
+            public RegexPooledObjectPolicy(string pattern, RegexOptions? options = null, TimeSpan? matchTimeout = null) {
                 Pattern = pattern;
                 Options = options;
                 MatchTimeout = matchTimeout;
