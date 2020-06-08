@@ -21,7 +21,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <param name="pattern">The regular expression pattern to match.</param>
         /// <exception cref="System.ArgumentException">A regular expression parsing error occurred.</exception>
         /// <exception cref="System.ArgumentNullException">pattern is null.</exception>
-        public Regex(string pattern, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+        public Regex(string pattern, string poolKey = null, int? poolSize = null) : base(poolKey, poolSize) {
             _pattern = pattern;
         }
 
@@ -34,7 +34,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentException">A regular expression parsing error occurred.</exception>
         /// <exception cref="System.ArgumentNullException">pattern is null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException:">options contains an invalid flag.</exception>
-        public Regex(string pattern, RegexOptions options, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+        public Regex(string pattern, RegexOptions options, string poolKey = null, int? poolSize = null) : base(poolKey, poolSize) {
             _pattern = pattern;
             _options = options;
         }
@@ -53,7 +53,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentOutOfRangeException:">
         /// options is not a valid System.Text.RegularExpressions.RegexOptions value. -or- matchTimeout is negative, zero, or greater than approximately 24 days.
         /// </exception>
-        public Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+        public Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, string poolKey = null, int? poolSize = null) : base(poolKey, poolSize) {
             _pattern = pattern;
             _options = options;
             _matchTimeout = matchTimeout;

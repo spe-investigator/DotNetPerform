@@ -12,7 +12,7 @@ namespace System.Text.Perf {
         /// <param name="characteristic">The type of pooling to utilize.</param>
         /// <param name="poolKey">Pool name for Pooled characteristic. Groups objects with same pool key.</param>
         /// <param name="poolSize">Pool size for Pooled characteristic.</param>
-        public StringBuilder(PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = "", int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+        public StringBuilder(string poolKey = "", int? poolSize = null) : base(poolKey, poolSize) {
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace System.Text.Perf {
         /// <param name="poolKey">Pool name for Pooled characteristic. Groups objects with same pool key.</param>
         /// <param name="poolSize">Pool size for Pooled characteristic.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">capacity is less than zero.</exception>
-        public StringBuilder(int capacity, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = "", int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+        public StringBuilder(int capacity, string poolKey = "", int? poolSize = null) : base(poolKey, poolSize) {
             _capacity = capacity;
         }
 
@@ -37,7 +37,7 @@ namespace System.Text.Perf {
         /// <param name="poolKey">Pool name for Pooled characteristic. Groups objects with same pool key.</param>
         /// <param name="poolSize">Pool size for Pooled characteristic.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">maxCapacity is less than one, capacity is less than zero, or capacity is greater than maxCapacity.</exception>
-        public StringBuilder(int capacity, int maximumRetainedCapacity, PerformanceCharacteristic characteristic, string poolKey = "", int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+        public StringBuilder(int capacity, int maximumRetainedCapacity, string poolKey = "", int? poolSize = null) : base(poolKey, poolSize) {
             _capacity = capacity;
             _maximumRetainedCapacity = maximumRetainedCapacity;
         }

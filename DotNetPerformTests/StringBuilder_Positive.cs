@@ -8,32 +8,37 @@ namespace DotNetPerformTests {
         const bool DONOTCLEAR = true;
 
         [Theory]
-        [InlineData(PerformanceCharacteristic.ThreadStatic)]
-        [InlineData(PerformanceCharacteristic.Pooled)]
-        public void ByCharacteristic_ShouldBeSame(PerformanceCharacteristic characteristic) {
-            var stringBuilder = new Text.Perf.StringBuilder(characteristic);
-            stringBuilder.Append("Test, test, test");
-            stringBuilder.Dispose(DONOTCLEAR);
-            
-            var stringBuilder2 = new Text.Perf.StringBuilder(characteristic);
-            
-            stringBuilder._performanceObject.Should().BeSameAs(stringBuilder2._performanceObject);
-            stringBuilder.ToString().Should().Be(stringBuilder2.ToString());
-        }
-
-        [Theory]
-        [InlineData(PerformanceCharacteristic.ThreadStatic)]
-        [InlineData(PerformanceCharacteristic.Pooled)]
-        public void ByCharacteristic_PoolKey_ShouldBeSame(PerformanceCharacteristic characteristic) {
-            var poolKey = "Test1";
-            var stringBuilder = new Text.Perf.StringBuilder(characteristic, poolKey);
+        [InlineData(null)]
+        [InlineData("Test1")]
+        public void ByCharacteristic_PoolKey_ShouldBeSame(string poolKey) {
+            var stringBuilder = new Text.Perf.StringBuilder(poolKey);
             stringBuilder.Append("I want to test this out.");
             stringBuilder.Dispose(DONOTCLEAR);
             
-            var stringBuilder2 = new Text.Perf.StringBuilder(characteristic, poolKey);
+            var stringBuilder2 = new Text.Perf.StringBuilder(poolKey);
 
             stringBuilder2._performanceObject.Should().BeSameAs(stringBuilder._performanceObject);
             stringBuilder2.ToString().Should().Be(stringBuilder.ToString());
+        }
+
+        [Fact]
+        public void Allocate_NonPooled() {
+            var stringBuilder = new Text.Perf.StringBuilder(poolSize: 4);
+            stringBuilder.Append("I want to test this out.");
+            stringBuilder.IsPoolAllocated.Should().BeTrue();
+
+            var stringBuilder2 = new Text.Perf.StringBuilder(poolSize: 4);
+            stringBuilder2.IsPoolAllocated.Should().BeTrue();
+
+            var stringBuilder3 = new Text.Perf.StringBuilder(poolSize: 4);
+            stringBuilder3.IsPoolAllocated.Should().BeTrue();
+
+            var stringBuilder4 = new Text.Perf.StringBuilder(poolSize: 4);
+            stringBuilder4.IsPoolAllocated.Should().BeTrue();
+
+            var stringBuilder5 = new Text.Perf.StringBuilder(poolSize: 4);
+
+            stringBuilder5.IsPoolAllocated.Should().BeFalse();
         }
     }
 }
