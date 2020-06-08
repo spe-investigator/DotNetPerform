@@ -1,53 +1,45 @@
-﻿using System.Performance;
+﻿using SpeDotNetPerform.Performance;
+using System.Performance;
 
 namespace System.Text.Perf {
     public class StringBuilder : PerformanceBase<Text.StringBuilder> {
+        private readonly int? _maximumRetainedCapacity;
+        private readonly int? _capacity;
+
         /// <summary>
         /// Initializes a new instance of the System.Text.StringBuilder class.
         /// </summary>
-        /// <param name="characteristic"></param>
-        /// <param name="poolSize"></param>
-        public StringBuilder(PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, int poolSize = 10) : base(characteristic, poolSize, string.Empty, new Microsoft.Extensions.ObjectPool.StringBuilderPooledObjectPolicy()) {
+        /// <param name="characteristic">The type of pooling to utilize.</param>
+        /// <param name="poolKey">Pool name for Pooled characteristic. Groups objects with same pool key.</param>
+        /// <param name="poolSize">Pool size for Pooled characteristic.</param>
+        public StringBuilder(PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = "", int poolSize = 10) : base(characteristic, poolSize, poolKey) {
         }
 
-        //
-        // Summary:
-        //     Initializes a new instance of the System.Text.StringBuilder class using the specified
-        //     capacity.
-        //
-        // Parameters:
-        //   capacity:
-        //     The suggested starting size of this instance.
-        //
-        // Exceptions:
-        //   T:System.ArgumentOutOfRangeException:
-        //     capacity is less than zero.
-        public StringBuilder(int capacity, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, int poolSize = 10) : base(characteristic, poolSize, string.Empty, new Microsoft.Extensions.ObjectPool.StringBuilderPooledObjectPolicy() {
-            InitialCapacity = capacity
-        }) {
+        /// <summary>
+        /// Initializes a new instance of the System.Text.StringBuilder class using the specified capacity.
+        /// </summary>
+        /// <param name="capacity">The suggested starting size of this instance.</param>
+        /// <param name="characteristic">The type of pooling to utilize.</param>
+        /// <param name="poolKey">Pool name for Pooled characteristic. Groups objects with same pool key.</param>
+        /// <param name="poolSize">Pool size for Pooled characteristic.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">capacity is less than zero.</exception>
+        public StringBuilder(int capacity, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = "", int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+            _capacity = capacity;
         }
-        
-        //
-        // Summary:
-        //     Initializes a new instance of the System.Text.StringBuilder class that starts
-        //     with a specified capacity and can grow to a specified maximum.
-        //
-        // Parameters:
-        //   capacity:
-        //     The suggested starting size of the System.Text.StringBuilder.
-        //
-        //   maxCapacity:
-        //     The maximum number of characters the current string can contain.
-        //
-        // Exceptions:
-        //   T:System.ArgumentOutOfRangeException:
-        //     maxCapacity is less than one, capacity is less than zero, or capacity is greater
-        //     than maxCapacity.
-        public StringBuilder(int capacity, int maxCapacity, PerformanceCharacteristic characteristic, int poolSize = 10) : base(characteristic, poolSize, string.Empty, new Microsoft.Extensions.ObjectPool.StringBuilderPooledObjectPolicy() {
-            InitialCapacity = capacity,
-            MaximumRetainedCapacity = maxCapacity
-        }) {
 
+        /// <summary>
+        /// Initializes a new instance of the System.Text.StringBuilder class that starts
+        /// with a specified capacity and can grow to a specified maximum.
+        /// </summary>
+        /// <param name="capacity">The suggested starting size of the System.Text.StringBuilder.</param>
+        /// <param name="maximumRetainedCapacity">The maximum number of characters the current string can contain.</param>
+        /// <param name="characteristic">The type of pooling to utilize.</param>
+        /// <param name="poolKey">Pool name for Pooled characteristic. Groups objects with same pool key.</param>
+        /// <param name="poolSize">Pool size for Pooled characteristic.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">maxCapacity is less than one, capacity is less than zero, or capacity is greater than maxCapacity.</exception>
+        public StringBuilder(int capacity, int maximumRetainedCapacity, PerformanceCharacteristic characteristic, string poolKey = "", int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+            _capacity = capacity;
+            _maximumRetainedCapacity = maximumRetainedCapacity;
         }
 
         //
@@ -84,7 +76,7 @@ namespace System.Text.Perf {
         //     The value specified for a set operation is less than the current length of this
         //     instance. -or- The value specified for a set operation is greater than the maximum
         //     capacity.
-        public int Capacity { get => _performanceObject.Capacity; set => _performanceObject.Capacity = value; }
+        public int? Capacity { get => _performanceObject?.Capacity; set => _performanceObject.Capacity = value.Value; }
         //
         // Summary:
         //     Gets or sets the length of the current System.Text.StringBuilder object.
@@ -102,7 +94,7 @@ namespace System.Text.Perf {
         //
         // Returns:
         //     The maximum number of characters this instance can hold.
-        public int MaxCapacity { get => _performanceObject.MaxCapacity; }
+        public int? MaxCapacity { get => _performanceObject?.MaxCapacity; }
 
         //
         // Summary:
@@ -1593,5 +1585,85 @@ namespace System.Text.Perf {
         //     startIndex or length is less than zero. -or- The sum of startIndex and length
         //     is greater than the length of the current instance.
         public string ToString(int startIndex, int length) => _performanceObject.ToString(startIndex, length);
+
+        public override void Dispose() => Dispose(false);
+
+        internal void Dispose(bool leaveContents) {
+            if (!leaveContents) {
+                _performanceObject.Clear();
+            }
+            
+            base.Dispose();
+        }
+
+        protected override IPooledObjectPolicy<Text.StringBuilder> getPooledObjectPolicyFactory() {
+            if (_maximumRetainedCapacity.HasValue) {
+                return new StringBuilderPooledObjectPolicy(_capacity.Value, _maximumRetainedCapacity.Value);
+            } else if (_capacity.HasValue) {
+                return new StringBuilderPooledObjectPolicy(_capacity.Value);
+            }
+            
+            return new StringBuilderPooledObjectPolicy();
+        }
+
+        public class StringBuilderPooledObjectPolicy : PooledObjectPolicy<Text.StringBuilder> {
+            private const int InitialCapacityMinimum = 100;
+            private const int MaximumRetainedCapacityMinimum = 4 * 1024;
+
+            /// <summary>
+            /// Default InitialCapacity is 100.
+            /// </summary>
+            public int? InitialCapacity { get; }
+
+            /// <summary>
+            /// Null value means retain no matter what size.
+            /// </summary>
+            public int? MaximumRetainedCapacity { get; }
+
+            public StringBuilderPooledObjectPolicy() {
+                InitialCapacity = InitialCapacityMinimum;
+                MaximumRetainedCapacity = MaximumRetainedCapacity;
+            }
+
+            public StringBuilderPooledObjectPolicy(int? initialCapacity) {
+                InitialCapacity = initialCapacity;
+                MaximumRetainedCapacity = MaximumRetainedCapacityMinimum;
+            }
+
+            public StringBuilderPooledObjectPolicy(int? initialCapacity, int? maximumRetainedCapacity) {
+                InitialCapacity = initialCapacity;
+                MaximumRetainedCapacity = maximumRetainedCapacity;
+            }
+
+            public override Text.StringBuilder Create() {
+                if (InitialCapacity.HasValue) {
+                    return new Text.StringBuilder(InitialCapacity.Value);
+                }
+                
+                return new Text.StringBuilder();
+            }
+
+            public override bool Equals(object obj) {
+                return obj is StringBuilderPooledObjectPolicy policy &&
+                       InitialCapacity == policy.InitialCapacity &&
+                       ((!MaximumRetainedCapacity.HasValue && !policy.MaximumRetainedCapacity.HasValue) || MaximumRetainedCapacity == policy.MaximumRetainedCapacity);
+            }
+
+            public override int GetHashCode() {
+                int hashCode = -686918596;
+                hashCode = hashCode * -1521134295 + InitialCapacity.GetHashCode();
+                hashCode = hashCode * -1521134295 + MaximumRetainedCapacity.GetHashCode();
+                return hashCode;
+            }
+
+            public override bool ShouldReturn(Text.StringBuilder obj) {
+                if (MaximumRetainedCapacity.HasValue && obj.Capacity > MaximumRetainedCapacity) {
+                    // Too big. Discard this one.
+                    return false;
+                }
+
+                return true;
+            }
+        }
     }
 }

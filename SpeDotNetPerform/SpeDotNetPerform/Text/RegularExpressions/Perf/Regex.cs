@@ -1,12 +1,19 @@
-﻿using Microsoft.Extensions.ObjectPool;
+﻿using SpeDotNetPerform.Performance;
 using System;
+using System.Collections.Generic;
 using System.Performance;
+using System.Reflection;
+using OP = Microsoft.Extensions.ObjectPool;
 
 namespace System.Text.RegularExpressions.Perf {
     /// <summary>
     /// Represents an immutable regular expression.
     /// </summary>
     public class Regex : PerformanceBase<System.Text.RegularExpressions.Regex> {
+        private readonly string _pattern;
+        private readonly RegexOptions? _options = null;
+        private readonly TimeSpan? _matchTimeout = null;
+
         /// <summary>
         /// Initializes a new instance of the System.Text.RegularExpressions.Regex class
         ///     for the specified regular expression.
@@ -14,7 +21,8 @@ namespace System.Text.RegularExpressions.Perf {
         /// <param name="pattern">The regular expression pattern to match.</param>
         /// <exception cref="System.ArgumentException">A regular expression parsing error occurred.</exception>
         /// <exception cref="System.ArgumentNullException">pattern is null.</exception>
-        public Regex(string pattern, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey, new RegexPooledObjectPolicy(pattern)/*, (pooledObjectPolicy, maximumRetention) => new */) {
+        public Regex(string pattern, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+            _pattern = pattern;
         }
 
         /// <summary>
@@ -26,7 +34,9 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentException">A regular expression parsing error occurred.</exception>
         /// <exception cref="System.ArgumentNullException">pattern is null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException:">options contains an invalid flag.</exception>
-        public Regex(string pattern, RegexOptions options, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey, new RegexPooledObjectPolicy(pattern, options)/*, (pooledObjectPolicy, maximumRetention) => new */) {
+        public Regex(string pattern, RegexOptions options, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+            _pattern = pattern;
+            _options = options;
         }
 
         /// <summary>
@@ -43,7 +53,10 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentOutOfRangeException:">
         /// options is not a valid System.Text.RegularExpressions.RegexOptions value. -or- matchTimeout is negative, zero, or greater than approximately 24 days.
         /// </exception>
-        public Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey, new RegexPooledObjectPolicy(pattern, options, matchTimeout)/*, (pooledObjectPolicy, maximumRetention) => new */) {
+        public Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, PerformanceCharacteristic characteristic = PerformanceCharacteristic.ThreadStatic, string poolKey = null, int poolSize = 10) : base(characteristic, poolSize, poolKey) {
+            _pattern = pattern;
+            _options = options;
+            _matchTimeout = matchTimeout;
         }
 
         //
@@ -560,6 +573,9 @@ namespace System.Text.RegularExpressions.Perf {
         //     The pattern parameter that was passed into the Regex constructor.
         public override string ToString() => _performanceObject.ToString();
 
+        protected override IPooledObjectPolicy<RegularExpressions.Regex> getPooledObjectPolicyFactory() {
+            return new RegexPooledObjectPolicy(_pattern, _options, _matchTimeout);
+        }
 
         ////
         //// Summary:
@@ -595,35 +611,86 @@ namespace System.Text.RegularExpressions.Perf {
         /// </summary>
         internal class RegexPooledObjectPolicy : PooledObjectPolicy<System.Text.RegularExpressions.Regex> {
             public string Pattern { get; set; }
-            
+
             public RegexOptions? Options { get; }
-            
+
             public TimeSpan? MatchTimeout { get; }
+
+            //public override IEqualityComparer<RegularExpressions.Regex> GetEqualityComparer { get; }
 
             public RegexPooledObjectPolicy(string pattern, RegexOptions? options = null, TimeSpan? matchTimeout = null) {
                 Pattern = pattern;
                 Options = options;
                 MatchTimeout = matchTimeout;
+                //GetEqualityComparer = new RegexGetEqualityComparer();
             }
 
             public override RegularExpressions.Regex Create() {
                 if (MatchTimeout.HasValue) {
+                    if (!Options.HasValue) {
+                        throw new ArgumentNullException(nameof(Options));
+                    }
                     return new RegularExpressions.Regex(Pattern, Options.Value, MatchTimeout.Value);
                 }
                 if (Options.HasValue) {
-                    if (!MatchTimeout.HasValue) {
-                        throw new ArgumentNullException(nameof(MatchTimeout));
-                    }
                     return new RegularExpressions.Regex(Pattern, Options.Value, MatchTimeout.Value);
                 }
 
                 return new RegularExpressions.Regex(Pattern);
             }
 
-            public override bool Return(RegularExpressions.Regex obj) {
+            public override bool ShouldReturn(RegularExpressions.Regex obj) {
                 // Do nothing.
                 return true;
             }
+
+            public override bool Equals(object obj) {
+                return obj is RegexPooledObjectPolicy policy &&
+                       Pattern == policy.Pattern &&
+                       ((!Options.HasValue && !policy.Options.HasValue) || Options == policy.Options) &&
+                       ((!MatchTimeout.HasValue && !policy.MatchTimeout.HasValue) || EqualityComparer<TimeSpan?>.Default.Equals(MatchTimeout, policy.MatchTimeout));
+            }
+
+            public bool Equals(RegexPooledObjectPolicy policy) {
+                return policy != null &&
+                       Pattern == policy.Pattern &&
+                       ((!Options.HasValue && !policy.Options.HasValue) || Options == policy.Options) &&
+                       ((!MatchTimeout.HasValue && !policy.MatchTimeout.HasValue) || EqualityComparer<TimeSpan?>.Default.Equals(MatchTimeout, policy.MatchTimeout));
+            }
+
+            public override int GetHashCode() {
+                int hashCode = 13281843;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Pattern);
+                if (Options.HasValue) {
+                    hashCode = hashCode * -1521134295 + Options.GetHashCode();
+                }
+                if (MatchTimeout.HasValue) {
+                    hashCode = hashCode * -1521134295 + MatchTimeout.GetHashCode();
+                }
+                return hashCode;
+            }
         }
+
+        //public class RegexGetEqualityComparer : IEqualityComparer<RegularExpressions.Regex> {
+        //    PropertyInfo regexPatternPropInfo { get; }
+            
+        //    public RegexGetEqualityComparer() {
+        //        regexPatternPropInfo = typeof(Regex).GetProperty("pattern", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        //    }
+
+        //    public bool Equals(RegularExpressions.Regex x, RegularExpressions.Regex y) {
+        //        var xPatt = regexPatternPropInfo.GetValue(x).ToString();
+        //        var yPatt = regexPatternPropInfo.GetValue(y).ToString();
+        //        if (xPatt == yPatt && x.Options == y.Options && x.MatchTimeout == y.MatchTimeout) {
+        //            return true;
+        //        }
+
+        //        return false;
+        //    }
+
+        //    public int GetHashCode(RegularExpressions.Regex obj) {
+        //        return obj.GetHashCode();
+        //    }
+        //}
     }
 }
