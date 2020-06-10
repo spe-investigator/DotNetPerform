@@ -7,7 +7,7 @@ namespace System.Performance {
         [ThreadStatic]
         protected T _threadedObject;
 
-        static readonly ConcurrentDictionary<Type, DefaultKeyedObjectPool<T>> _keyedObjectPoolCollection = new ConcurrentDictionary<Type, DefaultKeyedObjectPool<T>>();
+        static readonly ConcurrentDictionary<Type, DefaultKeyedObjectPool<T>> _keyedObjectPoolCollection;
 
         internal readonly T _performanceObject;
         internal readonly ObjectWrapper<T> _wrapperObject;
@@ -17,6 +17,10 @@ namespace System.Performance {
 
         public bool IsPoolAllocated => _wrapperObject.Index > -1;
 
+        static PerformanceBase() {
+            _keyedObjectPoolCollection = new ConcurrentDictionary<Type, DefaultKeyedObjectPool<T>>();
+        }
+
         protected PerformanceBase(string poolKey, int? poolSize = null) {
             if (!poolSize.HasValue) {
                 poolSize = Environment.ProcessorCount * 2;
@@ -24,7 +28,11 @@ namespace System.Performance {
 
             if (!_keyedObjectPoolCollection.TryGetValue(typeof(T), out _keyedObjectPool)) {
                 _keyedObjectPool = new DefaultKeyedObjectPool<T>(getPooledObjectPolicyFactory(), poolSize.Value);
-                _keyedObjectPoolCollection.TryAdd(typeof(T), _keyedObjectPool);
+                // If failed, then another thread inserted an object pool.
+                if (_keyedObjectPoolCollection.TryAdd(typeof(T), _keyedObjectPool)) {
+                    // Retry Get to reuse other thread's inserted Object Pool.
+                    _keyedObjectPoolCollection.TryGetValue(typeof(T), out _keyedObjectPool);
+                }
             }
 
             PoolKey = poolKey;
@@ -44,6 +52,10 @@ namespace System.Performance {
         /// </summary>
         public virtual void Dispose() {
             _keyedObjectPool.Return(PoolKey, _wrapperObject);
+        }
+
+        static internal void reset() {
+            _keyedObjectPoolCollection.Clear();
         }
     }
 }

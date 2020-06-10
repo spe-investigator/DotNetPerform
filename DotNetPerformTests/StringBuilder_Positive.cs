@@ -4,6 +4,7 @@ using Xunit;
 using FluentAssertions;
 
 namespace DotNetPerformTests {
+    [Collection("Sequential")]
     public class StringBuilder_Positive {
         const bool DONOTCLEAR = true;
 
@@ -19,6 +20,10 @@ namespace DotNetPerformTests {
 
             stringBuilder2._performanceObject.Should().BeSameAs(stringBuilder._performanceObject);
             stringBuilder2.ToString().Should().Be(stringBuilder.ToString());
+
+            stringBuilder2.Dispose();
+
+            System.Performance.PerformanceBase<Text.StringBuilder>.reset();
         }
 
         [Fact]
@@ -39,6 +44,14 @@ namespace DotNetPerformTests {
             var stringBuilder5 = new Text.Perf.StringBuilder(poolSize: 4);
 
             stringBuilder5.IsPoolAllocated.Should().BeFalse();
+
+            stringBuilder.Dispose();
+            stringBuilder2.Dispose();
+            stringBuilder3.Dispose();
+            stringBuilder4.Dispose();
+            stringBuilder5.Dispose();
+
+            System.Performance.PerformanceBase<Text.StringBuilder>.reset();
         }
     }
 }

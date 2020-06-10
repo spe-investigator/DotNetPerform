@@ -1593,7 +1593,10 @@ namespace System.Text.Perf {
                 _performanceObject.Clear();
             }
             
-            base.Dispose();
+            // Only need to Dispose if it's been allocated from the pool.
+            if (IsPoolAllocated) {
+                base.Dispose();
+            }
         }
 
         protected override IPooledObjectPolicy<Text.StringBuilder> getPooledObjectPolicyFactory() {
