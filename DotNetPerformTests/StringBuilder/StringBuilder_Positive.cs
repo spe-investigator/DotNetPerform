@@ -2,6 +2,7 @@ using System;
 using Text = System.Text;
 using Xunit;
 using FluentAssertions;
+using System.Collections.Generic;
 
 namespace DotNetPerformTests.StringBuilder {
     [Collection("Sequential")]
@@ -21,36 +22,35 @@ namespace DotNetPerformTests.StringBuilder {
 
                 stringBuilder2._performanceObject.Should().BeSameAs(stringBuilder._performanceObject);
                 stringBuilder2.ToString().Should().Be(stringBuilder.ToString());
-
-                stringBuilder2.Dispose();
             }
         }
 
-        [Fact]
-        public void Allocate_NonPooled() {
+        [Theory]
+        [InlineData(4)]
+        [InlineData(20)]
+        public void Allocate_NonPooled(int poolSize) {
             using (var test = new SpeDotNetPerform.Performance.PerformanceBaseTest<Text.StringBuilder>()) {
-                var stringBuilder = new Text.Perf.StringBuilder(poolSize: 4);
-                stringBuilder.Append("I want to test this out.");
-                stringBuilder.IsPoolAllocated.Should().BeTrue();
+                Text.Perf.StringBuilder priorStringBuilder = null;
+                var created = 0;
+                
+                do {
+                    var stringBuilder = new Text.Perf.StringBuilder(poolSize: poolSize);
+                    stringBuilder.Append("I want to test this out.");
+                    stringBuilder.IsPoolAllocated.Should().BeTrue();
 
-                var stringBuilder2 = new Text.Perf.StringBuilder(poolSize: 4);
-                stringBuilder2.IsPoolAllocated.Should().BeTrue();
+                    if (priorStringBuilder != null) {
+                        stringBuilder._performanceObject.Should().NotBeSameAs(priorStringBuilder._performanceObject);
+                    }
 
-                var stringBuilder3 = new Text.Perf.StringBuilder(poolSize: 4);
-                stringBuilder3.IsPoolAllocated.Should().BeTrue();
+                    created++;
+                    priorStringBuilder = stringBuilder;
+                } while (created < poolSize);
 
-                var stringBuilder4 = new Text.Perf.StringBuilder(poolSize: 4);
-                stringBuilder4.IsPoolAllocated.Should().BeTrue();
+                var afterPoolSaturated = new Text.Perf.StringBuilder(poolSize: poolSize);
+                afterPoolSaturated.IsPoolAllocated.Should().BeFalse();
 
-                var stringBuilder5 = new Text.Perf.StringBuilder(poolSize: 4);
-
-                stringBuilder5.IsPoolAllocated.Should().BeFalse();
-
-                stringBuilder.Dispose();
-                stringBuilder2.Dispose();
-                stringBuilder3.Dispose();
-                stringBuilder4.Dispose();
-                stringBuilder5.Dispose();
+                var afterPoolSaturatedAgain = new Text.Perf.StringBuilder(poolSize: poolSize);
+                afterPoolSaturatedAgain.IsPoolAllocated.Should().BeFalse();
             }
         }
     }

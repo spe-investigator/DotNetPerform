@@ -1,6 +1,6 @@
-﻿using OP = Microsoft.Extensions.ObjectPool;
-using SpeDotNetPerform.Performance;
+﻿using SpeDotNetPerform.Performance;
 using System.Collections.Concurrent;
+using System.Linq;
 
 namespace System.Performance {
     public abstract class PerformanceBase<T> : IDisposable where T : class {
@@ -58,6 +58,10 @@ namespace System.Performance {
         /// <returns></returns>
         protected abstract int getPolicyHashCode();
 
+        /// <summary>
+        /// Creates the policy object from the parameters of the constructor that uniquely identify the objects to be created by the policy.
+        /// </summary>
+        /// <returns></returns>
         protected abstract IPooledObjectPolicy<T> getPooledObjectPolicyFactory();
 
         /// <summary>
@@ -67,6 +71,14 @@ namespace System.Performance {
             _keyedObjectPool.Return(PoolKey, _wrapperObject);
         }
 
+        static internal void disposeAll() {
+            _keyedObjectPoolCollection.Values.ToList().ForEach(keyedPool => {
+                keyedPool.Values.ToList().ForEach(pool => {
+                    pool._items.Where(item => item.CheckOut.HasValue).ToList().ForEach(item => pool.Return(item));
+                });
+            });
+        }
+            
         static internal void reset() {
             _keyedObjectPoolCollection = null;
         }

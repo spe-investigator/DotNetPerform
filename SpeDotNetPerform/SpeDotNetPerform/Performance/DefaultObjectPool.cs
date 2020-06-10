@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace SpeDotNetPerform.Performance {
     public class DefaultObjectPool<T> where T : class {
-        private protected readonly ObjectWrapper<T>[] _items;
+        internal protected readonly ObjectWrapper<T>[] _items;
         private protected readonly IPooledObjectPolicy<T> _policy;
         private readonly int _poolSize;
         private protected readonly bool _isDefaultPolicy;
