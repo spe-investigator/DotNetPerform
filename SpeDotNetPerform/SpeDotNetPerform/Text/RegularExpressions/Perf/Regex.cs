@@ -573,6 +573,15 @@ namespace System.Text.RegularExpressions.Perf {
         //     The pattern parameter that was passed into the Regex constructor.
         public override string ToString() => _performanceObject.ToString();
 
+        protected override int getPolicyHashCode() {
+            var hashCode = _pattern.GetHashCode();
+
+            hashCode = hashCode * -1521134295 + _options.GetHashCode();
+            hashCode = hashCode * -1521134295 + _matchTimeout.GetHashCode();
+
+            return hashCode;
+        }
+
         protected override IPooledObjectPolicy<RegularExpressions.Regex> getPooledObjectPolicyFactory() {
             return new RegexPooledObjectPolicy(_pattern, _options, _matchTimeout);
         }

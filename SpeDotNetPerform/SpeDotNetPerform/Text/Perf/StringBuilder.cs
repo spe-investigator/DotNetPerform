@@ -1609,6 +1609,15 @@ namespace System.Text.Perf {
             return new StringBuilderPooledObjectPolicy();
         }
 
+        protected override int getPolicyHashCode() {
+            int hashCode = -686918596;
+            
+            hashCode = hashCode * -1521134295 + _capacity.GetHashCode();
+            hashCode = hashCode * -1521134295 + _maximumRetainedCapacity.GetHashCode();
+            
+            return hashCode;
+        }
+
         public class StringBuilderPooledObjectPolicy : PooledObjectPolicy<Text.StringBuilder> {
             private const int InitialCapacityMinimum = 100;
             private const int MaximumRetainedCapacityMinimum = 4 * 1024;

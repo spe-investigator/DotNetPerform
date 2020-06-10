@@ -7,43 +7,56 @@ namespace System.Performance {
         [ThreadStatic]
         protected T _threadedObject;
 
-        static readonly ConcurrentDictionary<Type, DefaultKeyedObjectPool<T>> _keyedObjectPoolCollection;
+        static ConcurrentDictionary<int, DefaultKeyedObjectPool<T>> _keyedObjectPoolCollection;
+        static ConcurrentDictionary<int, DefaultKeyedObjectPool<T>> keyedObjectPoolCollection {
+            get {
+                if (_keyedObjectPoolCollection == null) {
+                    _keyedObjectPoolCollection = new ConcurrentDictionary<int, DefaultKeyedObjectPool<T>>();
+                }
+
+                return _keyedObjectPoolCollection;
+            }
+        }
 
         internal readonly T _performanceObject;
         internal readonly ObjectWrapper<T> _wrapperObject;
         protected readonly DefaultKeyedObjectPool<T> _keyedObjectPool;
 
         public string PoolKey { get; }
+        public int PoolSize { get; }
 
         public bool IsPoolAllocated => _wrapperObject.Index > -1;
 
-        static PerformanceBase() {
-            _keyedObjectPoolCollection = new ConcurrentDictionary<Type, DefaultKeyedObjectPool<T>>();
-        }
-
         protected PerformanceBase(string poolKey, int? poolSize = null) {
-            if (!poolSize.HasValue) {
-                poolSize = Environment.ProcessorCount * 2;
-            }
-
-            if (!_keyedObjectPoolCollection.TryGetValue(typeof(T), out _keyedObjectPool)) {
-                _keyedObjectPool = new DefaultKeyedObjectPool<T>(getPooledObjectPolicyFactory(), poolSize.Value);
-                // If failed, then another thread inserted an object pool.
-                if (_keyedObjectPoolCollection.TryAdd(typeof(T), _keyedObjectPool)) {
-                    // Retry Get to reuse other thread's inserted Object Pool.
-                    _keyedObjectPoolCollection.TryGetValue(typeof(T), out _keyedObjectPool);
-                }
-            }
-
-            PoolKey = poolKey;
-
             if (poolSize < 1) {
                 throw new ArgumentException("Positive Pool Size value required.", "poolSize");
+            }
+            
+            PoolKey = poolKey;
+            PoolSize = !poolSize.HasValue ? Environment.ProcessorCount * 2 : poolSize.Value;
+
+            var policyHashCode = getPolicyHashCode();
+
+            var objectPoolCollection = keyedObjectPoolCollection; // Get accessor.
+            if (!objectPoolCollection.TryGetValue(policyHashCode, out _keyedObjectPool)) {
+                _keyedObjectPool = new DefaultKeyedObjectPool<T>(getPooledObjectPolicyFactory(), PoolSize);
+                
+                // If failed, then another thread inserted an object pool.
+                if (!objectPoolCollection.TryAdd(policyHashCode, _keyedObjectPool)) {
+                    // Retry Get to reuse other thread's inserted Object Pool.
+                    objectPoolCollection.TryGetValue(policyHashCode, out _keyedObjectPool);
+                }
             }
                 
             _wrapperObject = _keyedObjectPool.Get(poolKey);
             _performanceObject = _wrapperObject.Element;
         }
+
+        /// <summary>
+        /// Provide a HashCode for the policy because each unique policy gets its own pool.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract int getPolicyHashCode();
 
         protected abstract IPooledObjectPolicy<T> getPooledObjectPolicyFactory();
 
@@ -55,7 +68,7 @@ namespace System.Performance {
         }
 
         static internal void reset() {
-            _keyedObjectPoolCollection.Clear();
+            _keyedObjectPoolCollection = null;
         }
     }
 }
