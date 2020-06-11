@@ -18,8 +18,4 @@
     <ProjectReference Include="..\SpeDotNetPerform\SpeDotNetPerform\SpeDotNetPerform.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Regex\" />
-  </ItemGroup>
-
 </Project>

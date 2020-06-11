@@ -6,5 +6,9 @@ namespace SpeDotNetPerform.Performance {
         public void Dispose() {
             PerformanceBase<T>.reset();
         }
+        
+        public void DisposeAll() {
+            PerformanceBase<T>.disposeAll();
+        }
     }
 }

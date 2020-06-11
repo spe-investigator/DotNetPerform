@@ -18,14 +18,35 @@ namespace System.Performance {
             }
         }
 
-        internal readonly T _performanceObject;
-        internal readonly ObjectWrapper<T> _wrapperObject;
-        protected readonly DefaultKeyedObjectPool<T> _keyedObjectPool;
+        internal ObjectWrapper<T>? _wrapperObject;
+        internal ObjectWrapper<T> wrapperObject {
+            get {
+                if (_wrapperObject == null) {
+                    var objectPoolCollection = keyedObjectPoolCollection; // Get accessor.
+                    var policyHashCode = getPolicyHashCode();
+                    if (!objectPoolCollection.TryGetValue(policyHashCode, out _keyedObjectPool)) {
+                        _keyedObjectPool = new DefaultKeyedObjectPool<T>(getPooledObjectPolicyFactory(), PoolSize);
+
+                        // If failed, then another thread inserted an object pool.
+                        if (!objectPoolCollection.TryAdd(policyHashCode, _keyedObjectPool)) {
+                            // Retry Get to reuse other thread's inserted Object Pool.
+                            objectPoolCollection.TryGetValue(policyHashCode, out _keyedObjectPool);
+                        }
+                    }
+
+                    _wrapperObject = _keyedObjectPool.Get(PoolKey);
+                }
+
+                return _wrapperObject.Value;
+            }
+        }
+        internal T _performanceObject => wrapperObject.Element;
+        internal DefaultKeyedObjectPool<T> _keyedObjectPool;
 
         public string PoolKey { get; }
         public int PoolSize { get; }
 
-        public bool IsPoolAllocated => _wrapperObject.Index > -1;
+        public bool IsPoolAllocated => wrapperObject.Index > -1;
 
         protected PerformanceBase(string poolKey, int? poolSize = null) {
             if (poolSize < 1) {
@@ -33,29 +54,9 @@ namespace System.Performance {
             }
             
             PoolKey = poolKey;
-            PoolSize = !poolSize.HasValue ? Environment.ProcessorCount * 2 : poolSize.Value;
-
-            var policyHashCode = getPolicyHashCode();
-
-            var objectPoolCollection = keyedObjectPoolCollection; // Get accessor.
-            if (!objectPoolCollection.TryGetValue(policyHashCode, out _keyedObjectPool)) {
-                _keyedObjectPool = new DefaultKeyedObjectPool<T>(getPooledObjectPolicyFactory(), PoolSize);
-                
-                // If failed, then another thread inserted an object pool.
-                if (!objectPoolCollection.TryAdd(policyHashCode, _keyedObjectPool)) {
-                    // Retry Get to reuse other thread's inserted Object Pool.
-                    objectPoolCollection.TryGetValue(policyHashCode, out _keyedObjectPool);
-                }
-            }
-                
-            _wrapperObject = _keyedObjectPool.Get(poolKey);
-            _performanceObject = _wrapperObject.Element;
+            PoolSize = !poolSize.HasValue ? Environment.ProcessorCount * 2 : poolSize.Value;   
         }
 
-        /// <summary>
-        /// Provide a HashCode for the policy because each unique policy gets its own pool.
-        /// </summary>
-        /// <returns></returns>
         protected abstract int getPolicyHashCode();
 
         /// <summary>
@@ -68,7 +69,7 @@ namespace System.Performance {
         /// Override method and perform custom IPO cleanup logic, then call base.Dispose().
         /// </summary>
         public virtual void Dispose() {
-            _keyedObjectPool.Return(PoolKey, _wrapperObject);
+            _keyedObjectPool.Return(PoolKey, wrapperObject);
         }
 
         static internal void disposeAll() {

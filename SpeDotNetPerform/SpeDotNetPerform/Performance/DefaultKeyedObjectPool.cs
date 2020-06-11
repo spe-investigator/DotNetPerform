@@ -22,7 +22,7 @@ namespace SpeDotNetPerform.Performance {
             _poolSize = poolSize;
         }
 
-        private DefaultObjectPool<T> getObjectPool(string poolKey) {
+        internal DefaultObjectPool<T> getObjectPool(string poolKey) {
             if (poolKey == null) {
                 poolKey = string.Empty;
             }
