@@ -4,6 +4,8 @@ using System.Text;
 
 namespace SpeDotNetPerform.Performance {
     public abstract class PooledObjectPolicy<T> : IPooledObjectPolicy<T> {
+        public abstract bool OptimisticObjectCreation { get; }
+
         /// <summary>
         /// Create a T.
         /// </summary>

@@ -12,13 +12,14 @@ namespace SpeDotNetPerform.Performance {
     public class DefaultObjectPool<T> where T : class {
         internal protected readonly ObjectWrapper<T>[] _items;
         private protected readonly IPooledObjectPolicy<T> _policy;
-        private readonly int _poolSize;
         private protected readonly bool _isDefaultPolicy;
-        //private protected T _item;
-        //private protected int _itemIndex;
+        private protected int _lastItemIndex;
 
         // This class was introduced in 2.1 to avoid the interface call where possible
         private protected readonly PooledObjectPolicy<T> _fastPolicy;
+
+        public readonly int PoolSize;
+        public readonly bool OptimisticObjectCreation;
 
         /// <summary>
         /// Creates an instance of <see cref="Microsoft.Extensions.ObjectPool.DefaultObjectPool{T}"/>.
@@ -35,13 +36,11 @@ namespace SpeDotNetPerform.Performance {
         /// <param name="poolSize">The maximum number of objects to retain in the pool.</param>
         public DefaultObjectPool(IPooledObjectPolicy<T> policy, int poolSize) {
             _policy = policy ?? throw new ArgumentNullException(nameof(policy));
-            _poolSize = poolSize;
-            
+            PoolSize = poolSize;
             _fastPolicy = policy as PooledObjectPolicy<T>;
             _isDefaultPolicy = IsDefaultPolicy();
 
-            // -1 due to _firstItem
-            _items = Enumerable.Range(0, poolSize).Select(i => new ObjectWrapper<T>() { Element = Create(), Index = i, CheckOut = DateTime.MinValue, Check = null }).ToArray();
+            _items = Enumerable.Range(0, poolSize).Select(i => new ObjectWrapper<T>() { Element = _fastPolicy.OptimisticObjectCreation ? Create() : null, Index = i, CheckOut = DateTime.MinValue, Check = null }).ToArray();
 
             bool IsDefaultPolicy() {
                 var type = policy.GetType();
@@ -58,15 +57,35 @@ namespace SpeDotNetPerform.Performance {
         /// location1: The destination, whose value is compared with comparand and possibly replaced.
         /// value: The value that replaces the destination value if the comparison results in equality.
         /// comparand: The value that is compared to the value at location1.
+        /// 
+        /// _lastItemIndex performs a round-robin checking of items, starting with last checked index.
         /// </remarks>
         public ObjectWrapper<T> Get() {
-            //if (item == null || Interlocked.CompareExchange(ref _firstItem, null, item) != item) {
             var items = _items;
-            for (var i = 0; i < items.Length; i++) {
-                var exchangeCheck = Interlocked.CompareExchange(ref items[i].Check, new object(), null);
+            var itemIndex = _lastItemIndex;
+            var i = 0;
+            // Start at last item because it was the last one used from the pool.
+            // Perform modulus on itemIndex to wrap around to 0 upon exceeding pool size.
+            for (; i < PoolSize; i++) {
+                var exchangeCheck = Interlocked.CompareExchange(ref items[itemIndex].Check, new object(), null);
                 if (exchangeCheck == null) {
-                    items[i].CheckOut = DateTime.Now;
-                    return items[i];
+                    items[itemIndex].CheckOut = DateTime.Now;
+                    // If we're not doing optimistic object creation, then allocate one if not already done.
+                    if (!_fastPolicy.OptimisticObjectCreation && items[itemIndex].Element == null) {
+                        items[itemIndex].Element = Create();
+                    }
+                    // Assign last item index to start where you last allocated an object.
+                    if (itemIndex + 1 > items.Length) {
+                        _lastItemIndex = 0;
+                    } else {
+                        _lastItemIndex = itemIndex + 1;
+                    }
+                    return items[itemIndex];
+                }
+                
+                itemIndex++;
+                if (itemIndex > PoolSize) {
+                    itemIndex = 0;
                 }
             }
 
@@ -75,9 +94,6 @@ namespace SpeDotNetPerform.Performance {
                 Element = Create(),
                 Index = -1
             };
-            //}
-
-            //return item;
         }
 
         // Non-inline to improve its code quality as uncommon path
@@ -93,6 +109,11 @@ namespace SpeDotNetPerform.Performance {
                 if (_isDefaultPolicy || (_fastPolicy?.ShouldReturn(returnItem.Element) ?? _policy.ShouldReturn(returnItem.Element))) {
                     items[returnItem.Index].CheckOut = null;
                     items[returnItem.Index].Check = null;
+                } else {
+                    items[returnItem.Index].CheckOut = null;
+                    items[returnItem.Index].Check = null;
+                    // Since we're not keeping the prior object, then recreate this object.
+                    items[returnItem.Index].Element = Create();
                 }
             }
         }

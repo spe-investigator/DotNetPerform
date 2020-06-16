@@ -21,7 +21,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <param name="pattern">The regular expression pattern to match.</param>
         /// <exception cref="System.ArgumentException">A regular expression parsing error occurred.</exception>
         /// <exception cref="System.ArgumentNullException">pattern is null.</exception>
-        public Regex(string pattern, string poolKey = null, int? poolSize = null) : base(poolKey, poolSize) {
+        public Regex(string pattern, string poolKey = null, int? poolSize = null) : this(pattern, null, null, poolKey, poolSize) {
             if (string.IsNullOrEmpty(pattern))
                 throw new ArgumentNullException(nameof(pattern));
             _pattern = pattern;
@@ -36,11 +36,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentException">A regular expression parsing error occurred.</exception>
         /// <exception cref="System.ArgumentNullException">pattern is null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException:">options contains an invalid flag.</exception>
-        public Regex(string pattern, RegexOptions options, string poolKey = null, int? poolSize = null) : base(poolKey, poolSize) {
-            if (string.IsNullOrEmpty(pattern))
-                throw new ArgumentNullException(nameof(pattern));
-            _pattern = pattern;
-            _options = options;
+        public Regex(string pattern, RegexOptions options, string poolKey = null, int? poolSize = null) : this(pattern, options, null, poolKey, poolSize) {
         }
 
         /// <summary>
@@ -57,7 +53,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentOutOfRangeException:">
         /// options is not a valid System.Text.RegularExpressions.RegexOptions value. -or- matchTimeout is negative, zero, or greater than approximately 24 days.
         /// </exception>
-        public Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, string poolKey = null, int? poolSize = null) : base(poolKey, poolSize) {
+        public Regex(string pattern, RegexOptions? options, TimeSpan? matchTimeout, string poolKey = null, int? poolSize = null) : base(poolKey, poolSize) {
             if (string.IsNullOrEmpty(pattern))
                 throw new ArgumentNullException(nameof(pattern));
             _pattern = pattern;
@@ -631,13 +627,12 @@ namespace System.Text.RegularExpressions.Perf {
 
             public TimeSpan? MatchTimeout { get; }
 
-            //public override IEqualityComparer<RegularExpressions.Regex> GetEqualityComparer { get; }
+            public override bool OptimisticObjectCreation { get; } = true;
 
             public RegexPooledObjectPolicy(string pattern, RegexOptions? options = null, TimeSpan? matchTimeout = null) {
                 Pattern = pattern;
                 Options = options;
                 MatchTimeout = matchTimeout;
-                //GetEqualityComparer = new RegexGetEqualityComparer();
             }
 
             public override RegularExpressions.Regex Create() {
@@ -645,8 +640,10 @@ namespace System.Text.RegularExpressions.Perf {
                     if (!Options.HasValue) {
                         throw new ArgumentNullException(nameof(Options));
                     }
+                    
                     return new RegularExpressions.Regex(Pattern, Options.Value, MatchTimeout.Value);
                 }
+
                 if (Options.HasValue) {
                     return new RegularExpressions.Regex(Pattern, Options.Value, MatchTimeout.Value);
                 }
@@ -675,37 +672,13 @@ namespace System.Text.RegularExpressions.Perf {
 
             public override int GetHashCode() {
                 int hashCode = 13281843;
+                
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Pattern);
-                if (Options.HasValue) {
-                    hashCode = hashCode * -1521134295 + Options.GetHashCode();
-                }
-                if (MatchTimeout.HasValue) {
-                    hashCode = hashCode * -1521134295 + MatchTimeout.GetHashCode();
-                }
+                hashCode = hashCode * -1521134295 + Options.GetHashCode();
+                hashCode = hashCode * -1521134295 + MatchTimeout.GetHashCode();
+
                 return hashCode;
             }
         }
-
-        //public class RegexGetEqualityComparer : IEqualityComparer<RegularExpressions.Regex> {
-        //    PropertyInfo regexPatternPropInfo { get; }
-            
-        //    public RegexGetEqualityComparer() {
-        //        regexPatternPropInfo = typeof(Regex).GetProperty("pattern", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        //    }
-
-        //    public bool Equals(RegularExpressions.Regex x, RegularExpressions.Regex y) {
-        //        var xPatt = regexPatternPropInfo.GetValue(x).ToString();
-        //        var yPatt = regexPatternPropInfo.GetValue(y).ToString();
-        //        if (xPatt == yPatt && x.Options == y.Options && x.MatchTimeout == y.MatchTimeout) {
-        //            return true;
-        //        }
-
-        //        return false;
-        //    }
-
-        //    public int GetHashCode(RegularExpressions.Regex obj) {
-        //        return obj.GetHashCode();
-        //    }
-        //}
     }
 }

@@ -3,6 +3,7 @@ using Text = System.Text;
 using Xunit;
 using FluentAssertions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DotNetPerformTests.StringBuilder {
     [Collection("Sequential")]
@@ -10,15 +11,19 @@ namespace DotNetPerformTests.StringBuilder {
         const bool DONOTCLEAR = true;
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("Test1")]
-        public void ByCharacteristic_PoolKey_ShouldBeSame(string poolKey) {
+        [InlineData(null, null, null)] // No cap, no max
+        [InlineData(null, null, "Test1")]
+        [InlineData(10, null, null)] // Cap, no max
+        [InlineData(10, null, "Test1")]
+        [InlineData(10, 1000, null)] // Cap with max
+        [InlineData(10, 1000, "Test1")]
+        public void ByCharacteristic_PoolKey_ShouldBeSame(int? capacity, int? maxCapacity, string poolKey) {
             using (var test = new SpeDotNetPerform.Performance.PerformanceBaseTest<Text.StringBuilder>()) {
-                var stringBuilder = new Text.Perf.StringBuilder(poolKey);
+                var stringBuilder = new Text.Perf.StringBuilder(capacity, maxCapacity, poolKey);
                 stringBuilder.Append("I want to test this out.");
                 stringBuilder.Dispose(DONOTCLEAR);
 
-                var stringBuilder2 = new Text.Perf.StringBuilder(poolKey);
+                var stringBuilder2 = new Text.Perf.StringBuilder(capacity, maxCapacity, poolKey);
 
                 stringBuilder2._performanceObject.Should().BeSameAs(stringBuilder._performanceObject);
                 stringBuilder2.ToString().Should().Be(stringBuilder.ToString());
@@ -26,16 +31,22 @@ namespace DotNetPerformTests.StringBuilder {
         }
 
         [Theory]
-        [InlineData(4)]
-        [InlineData(20)]
-        public void Allocate_NonPooled(int poolSize) {
+        [InlineData(null, null, 4)]
+        [InlineData(null, null, 20)]
+        [InlineData(10, null, 4)]
+        [InlineData(10, null, 20)]
+        [InlineData(10, 1000, 4)]
+        [InlineData(10, 1000, 20)]
+        public void Allocate_NonPooled(int? capacity, int? maxCapacity, int poolSize) {
             using (var test = new SpeDotNetPerform.Performance.PerformanceBaseTest<Text.StringBuilder>()) {
                 Text.Perf.StringBuilder priorStringBuilder = null;
                 var created = 0;
-                
+                var contents = string.Join(',', Enumerable.Repeat("I want to test this out", 100));
+
                 do {
-                    var stringBuilder = new Text.Perf.StringBuilder(poolSize: poolSize);
-                    stringBuilder.Append("I want to test this out.");
+                    var stringBuilder = new Text.Perf.StringBuilder(capacity, maxCapacity, poolSize: poolSize);
+                    
+                    stringBuilder.Append(contents);
                     stringBuilder.IsPoolAllocated.Should().BeTrue();
 
                     if (priorStringBuilder != null) {
@@ -46,10 +57,10 @@ namespace DotNetPerformTests.StringBuilder {
                     priorStringBuilder = stringBuilder;
                 } while (created < poolSize);
 
-                var afterPoolSaturated = new Text.Perf.StringBuilder(poolSize: poolSize);
+                var afterPoolSaturated = new Text.Perf.StringBuilder(capacity, maxCapacity, poolSize: poolSize);
                 afterPoolSaturated.IsPoolAllocated.Should().BeFalse();
 
-                var afterPoolSaturatedAgain = new Text.Perf.StringBuilder(poolSize: poolSize);
+                var afterPoolSaturatedAgain = new Text.Perf.StringBuilder(capacity, maxCapacity, poolSize: poolSize);
                 afterPoolSaturatedAgain.IsPoolAllocated.Should().BeFalse();
             }
         }

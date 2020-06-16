@@ -9,6 +9,8 @@ namespace SpeDotNetPerform.Performance {
     //   T:
     //     The type of object which is being pooled.
     public interface IPooledObjectPolicy<T> : OP.IPooledObjectPolicy<T> {
+        bool OptimisticObjectCreation { get; }
+
         /// <summary>
         /// Runs some processing when an object was returned to the pool.Can be used to
         /// reset the state of an object and indicate if the object should be returned to

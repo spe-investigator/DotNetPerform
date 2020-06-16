@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleToAttribute("DotNetPerformTests", AllInternalsVisible = true)]
+[assembly: InternalsVisibleTo("DotNetPerformTests", AllInternalsVisible = true)]
+[assembly: InternalsVisibleTo("DotNetPerformBenchmarks", AllInternalsVisible = true)]
