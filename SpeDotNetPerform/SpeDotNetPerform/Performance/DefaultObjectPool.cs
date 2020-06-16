@@ -75,7 +75,7 @@ namespace SpeDotNetPerform.Performance {
                         items[itemIndex].Element = Create();
                     }
                     // Assign last item index to start where you last allocated an object.
-                    if (itemIndex + 1 > items.Length) {
+                    if (itemIndex + 1 >= PoolSize) {
                         _lastItemIndex = 0;
                     } else {
                         _lastItemIndex = itemIndex + 1;
@@ -84,7 +84,7 @@ namespace SpeDotNetPerform.Performance {
                 }
                 
                 itemIndex++;
-                if (itemIndex > PoolSize) {
+                if (itemIndex >= PoolSize) {
                     itemIndex = 0;
                 }
             }

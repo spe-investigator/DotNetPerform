@@ -42,7 +42,6 @@ namespace DotNetPerformTests.StringBuilder {
                 stringBuilder.IsPoolAllocated.Should().BeTrue();
 
                 stringBuilder.Dispose();
-
             }
         }
     }

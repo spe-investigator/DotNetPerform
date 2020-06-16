@@ -9,7 +9,7 @@ namespace DotNetPerformTests.StringBuilder {
         [Theory]
         [InlineData(20)]
         [InlineData(100)]
-        public void ThreadStatic(int poolSize) {
+        public void PoolSizeExceeded(int poolSize) {
             using (var test = new SpeDotNetPerform.Performance.PerformanceBaseTest<Text.StringBuilder>()) {
                 Text.Perf.StringBuilder priorStringBuilder = null;
                 var created = 0;

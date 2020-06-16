@@ -1600,7 +1600,7 @@ namespace System.Text.Perf {
         }
 
         protected override IPooledObjectPolicy<Text.StringBuilder> getPooledObjectPolicyFactory() {
-            return new StringBuilderPooledObjectPolicy(_capacity.Value, _maximumRetainedCapacity.Value);
+            return new StringBuilderPooledObjectPolicy(_capacity, _maximumRetainedCapacity);
         }
 
         protected override int getPolicyHashCode() {
