@@ -21,6 +21,8 @@ namespace SpeDotNetPerform.Performance {
         public readonly int PoolSize;
         public readonly bool OptimisticObjectCreation;
 
+        private static object checkObject = new object();
+
         /// <summary>
         /// Creates an instance of <see cref="Microsoft.Extensions.ObjectPool.DefaultObjectPool{T}"/>.
         /// </summary>
@@ -40,7 +42,7 @@ namespace SpeDotNetPerform.Performance {
             _fastPolicy = policy as PooledObjectPolicy<T>;
             _isDefaultPolicy = IsDefaultPolicy();
 
-            _items = Enumerable.Range(0, poolSize).Select(i => new ObjectWrapper<T>() { Element = _fastPolicy.OptimisticObjectCreation ? Create() : null, Index = i, CheckOut = DateTime.MinValue, Check = null }).ToArray();
+            _items = Enumerable.Range(0, poolSize).Select(i => new ObjectWrapper<T>() { Element = _fastPolicy.OptimisticObjectCreation ? Create() : null, Index = i/*, CheckOut = DateTime.MinValue*/ }).ToArray();
 
             bool IsDefaultPolicy() {
                 var type = policy.GetType();
@@ -67,9 +69,9 @@ namespace SpeDotNetPerform.Performance {
             // Start at last item because it was the last one used from the pool.
             // Perform modulus on itemIndex to wrap around to 0 upon exceeding pool size.
             for (; i < PoolSize; i++) {
-                var exchangeCheck = Interlocked.CompareExchange(ref items[itemIndex].Check, new object(), null);
+                var exchangeCheck = Interlocked.CompareExchange(ref items[itemIndex].Check, checkObject, null);
                 if (exchangeCheck == null) {
-                    items[itemIndex].CheckOut = DateTime.Now;
+                    //items[itemIndex].CheckOut = DateTime.Now;
                     // If we're not doing optimistic object creation, then allocate one if not already done.
                     if (!_fastPolicy.OptimisticObjectCreation && items[itemIndex].Element == null) {
                         items[itemIndex].Element = Create();
@@ -107,15 +109,19 @@ namespace SpeDotNetPerform.Performance {
                 var items = _items;
 
                 if (_isDefaultPolicy || (_fastPolicy?.ShouldReturn(returnItem.Element) ?? _policy.ShouldReturn(returnItem.Element))) {
-                    items[returnItem.Index].CheckOut = null;
+                    //items[returnItem.Index].CheckOut = null;
                     items[returnItem.Index].Check = null;
                 } else {
-                    items[returnItem.Index].CheckOut = null;
+                    //items[returnItem.Index].CheckOut = null;
                     items[returnItem.Index].Check = null;
                     // Since we're not keeping the prior object, then recreate this object.
                     items[returnItem.Index].Element = Create();
                 }
             }
+        }
+
+        internal void resetItemCounter() {
+            _lastItemIndex = 0;
         }
     }
 
@@ -125,6 +131,6 @@ namespace SpeDotNetPerform.Performance {
         public T Element;
         public int Index;
         public object Check;
-        public DateTime? CheckOut;
+        //public DateTime? CheckOut;
     }
 }

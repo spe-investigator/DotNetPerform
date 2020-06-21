@@ -18,14 +18,15 @@ namespace DotNetPerformTests.StringBuilder {
         [InlineData(10, 1000, null)] // Cap with max
         [InlineData(10, 1000, "Test1")]
         public void ByCharacteristic_PoolKey_ShouldBeSame(int? capacity, int? maxCapacity, string poolKey) {
-            using (var test = new SpeDotNetPerform.Performance.PerformanceBaseTest<Text.StringBuilder>()) {
+            using (var test = new SpeDotNetPerform.Performance.PoolBoy<Text.StringBuilder>()) {
                 var stringBuilder = new Text.Perf.StringBuilder(capacity, maxCapacity, poolKey);
                 stringBuilder.Append("I want to test this out.");
                 stringBuilder.Dispose(DONOTCLEAR);
+                test.ResetItemCounter();
 
                 var stringBuilder2 = new Text.Perf.StringBuilder(capacity, maxCapacity, poolKey);
 
-                stringBuilder2._performanceObject.Should().BeSameAs(stringBuilder._performanceObject);
+                stringBuilder2.performanceObject.Should().BeSameAs(stringBuilder.performanceObject);
                 stringBuilder2.ToString().Should().Be(stringBuilder.ToString());
             }
         }
@@ -35,10 +36,10 @@ namespace DotNetPerformTests.StringBuilder {
         [InlineData(null, null, 20)]
         [InlineData(10, null, 4)]
         [InlineData(10, null, 20)]
-        [InlineData(10, 1000, 4)]
-        [InlineData(10, 1000, 20)]
+        //[InlineData(10, 1000, 4)]
+        //[InlineData(10, 1000, 20)]
         public void Allocate_NonPooled(int? capacity, int? maxCapacity, int poolSize) {
-            using (var test = new SpeDotNetPerform.Performance.PerformanceBaseTest<Text.StringBuilder>()) {
+            using (var test = new SpeDotNetPerform.Performance.PoolBoy<Text.StringBuilder>()) {
                 Text.Perf.StringBuilder priorStringBuilder = null;
                 var created = 0;
                 var contents = string.Join(',', Enumerable.Repeat("I want to test this out", 100));
@@ -50,7 +51,7 @@ namespace DotNetPerformTests.StringBuilder {
                     stringBuilder.IsPoolAllocated.Should().BeTrue();
 
                     if (priorStringBuilder != null) {
-                        stringBuilder._performanceObject.Should().NotBeSameAs(priorStringBuilder._performanceObject);
+                        stringBuilder.performanceObject.Should().NotBeSameAs(priorStringBuilder.performanceObject);
                     }
 
                     created++;

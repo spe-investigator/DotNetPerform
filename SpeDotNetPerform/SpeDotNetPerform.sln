@@ -16,7 +16,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Repository Files", "Reposit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetPerformTests", "..\DotNetPerformTests\DotNetPerformTests.csproj", "{5C49309B-E32A-432B-93B5-F742AFFC0ACF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetPerformBenchmarks", "DotNetPerformBenchmarks\DotNetPerformBenchmarks.csproj", "{0CEB6BFB-0B99-4864-8FBB-8A736150B266}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetPerformBenchmarks", "DotNetPerformBenchmarks\DotNetPerformBenchmarks.csproj", "{0CEB6BFB-0B99-4864-8FBB-8A736150B266}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetPerformCli", "DotNetPerformCli\DotNetPerformCli.csproj", "{F265617C-3284-457F-967F-279F32C7EF01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +38,10 @@ Global
 		{0CEB6BFB-0B99-4864-8FBB-8A736150B266}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CEB6BFB-0B99-4864-8FBB-8A736150B266}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CEB6BFB-0B99-4864-8FBB-8A736150B266}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F265617C-3284-457F-967F-279F32C7EF01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F265617C-3284-457F-967F-279F32C7EF01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F265617C-3284-457F-967F-279F32C7EF01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F265617C-3284-457F-967F-279F32C7EF01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

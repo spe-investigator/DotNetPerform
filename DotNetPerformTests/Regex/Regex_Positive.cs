@@ -13,7 +13,7 @@ namespace DotNetPerformTests.StringBuilder {
         [InlineData(null)]
         [InlineData("Test1")]
         public void SamePattern_SamePool(string poolKey) {
-            using (var test = new SpeDotNetPerform.Performance.PerformanceBaseTest<Text.RegularExpressions.Regex>()) {
+            using (var test = new SpeDotNetPerform.Performance.PoolBoy<Text.RegularExpressions.Regex>()) {
                 const string numbersRegexPattern = "[0-9]+";
                 var regexNumbers = new Text.RegularExpressions.Perf.Regex(numbersRegexPattern, poolKey);
 
@@ -21,9 +21,8 @@ namespace DotNetPerformTests.StringBuilder {
 
                 regexNumbers.IsPoolAllocated.Should().BeTrue();
                 regexNumbers2.IsPoolAllocated.Should().BeTrue();
-                regexNumbers2._keyedObjectPool.Should().BeSameAs(regexNumbers._keyedObjectPool);
-                regexNumbers2._keyedObjectPool.getObjectPool(poolKey).Should().BeSameAs(regexNumbers._keyedObjectPool.getObjectPool(poolKey));
-                regexNumbers2._performanceObject.Should().NotBeSameAs(regexNumbers._performanceObject);
+                regexNumbers2._objectPool.Should().BeSameAs(regexNumbers._objectPool);
+                regexNumbers2.performanceObject.Should().NotBeSameAs(regexNumbers.performanceObject);
             }
         }
 
@@ -31,7 +30,7 @@ namespace DotNetPerformTests.StringBuilder {
         [InlineData(4)]
         [InlineData(20)]
         public void Allocate_NonPooled(int poolSize) {
-            using (var test = new SpeDotNetPerform.Performance.PerformanceBaseTest<Text.RegularExpressions.Regex>()) {
+            using (var test = new SpeDotNetPerform.Performance.PoolBoy<Text.RegularExpressions.Regex>()) {
                 Text.RegularExpressions.Perf.Regex priorRegexNumbers = null;
                 const string numbersRegexPattern = "[0-9]+";
                 var created = 0;
@@ -41,7 +40,7 @@ namespace DotNetPerformTests.StringBuilder {
                     regexNumbers.IsPoolAllocated.Should().BeTrue();
 
                     if (priorRegexNumbers != null) {
-                        regexNumbers._performanceObject.Should().NotBeSameAs(priorRegexNumbers._performanceObject);
+                        regexNumbers.performanceObject.Should().NotBeSameAs(priorRegexNumbers.performanceObject);
                     }
 
                     created++;

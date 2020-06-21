@@ -5,6 +5,7 @@ namespace System.Text.Perf {
     public class StringBuilder : PerformanceBase<Text.StringBuilder> {
         private readonly int? _maximumRetainedCapacity;
         private readonly int? _capacity;
+        private readonly bool _hasCapacity;
 
         /// <summary>
         /// Initializes a new instance of the System.Text.StringBuilder class.
@@ -37,7 +38,12 @@ namespace System.Text.Perf {
         /// <param name="poolSize">Pool size for Pooled characteristic.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">maxCapacity is less than one, capacity is less than zero, or capacity is greater than maxCapacity.</exception>
         public StringBuilder(int? capacity, int? maximumRetainedCapacity, string poolKey = "", int? poolSize = null) : base(poolKey, poolSize) {
-            _capacity = capacity;
+            if (capacity.HasValue) {
+                _capacity = (int)(capacity.Value * 1.1);
+                _hasCapacity = true;
+            } else {
+                _hasCapacity = false;
+            }
             _maximumRetainedCapacity = maximumRetainedCapacity;
         }
 
@@ -58,7 +64,7 @@ namespace System.Text.Perf {
         //
         //   T:System.IndexOutOfRangeException:
         //     index is outside the bounds of this instance while getting a character.
-        public char this[int index] { get => _performanceObject[index]; set => _performanceObject[index] = value; }
+        public char this[int index] { get => performanceObject[index]; set => performanceObject[index] = value; }
 
         //
         // Summary:
@@ -75,7 +81,7 @@ namespace System.Text.Perf {
         //     The value specified for a set operation is less than the current length of this
         //     instance. -or- The value specified for a set operation is greater than the maximum
         //     capacity.
-        public int? Capacity { get => _performanceObject?.Capacity; set => _performanceObject.Capacity = value.Value; }
+        public int? Capacity { get => performanceObject?.Capacity; set => performanceObject.Capacity = value.Value; }
         //
         // Summary:
         //     Gets or sets the length of the current System.Text.StringBuilder object.
@@ -86,14 +92,14 @@ namespace System.Text.Perf {
         // Exceptions:
         //   T:System.ArgumentOutOfRangeException:
         //     The value specified for a set operation is less than zero or greater than System.Text.StringBuilder.MaxCapacity.
-        public int Length { get => _performanceObject.Length; set => _performanceObject.Length = value; }
+        public int Length { get => performanceObject.Length; set => performanceObject.Length = value; }
         //
         // Summary:
         //     Gets the maximum capacity of this instance.
         //
         // Returns:
         //     The maximum number of characters this instance can hold.
-        public int? MaxCapacity { get => _performanceObject?.MaxCapacity; }
+        public int? MaxCapacity { get => performanceObject?.MaxCapacity; }
 
         //
         // Summary:
@@ -118,7 +124,7 @@ namespace System.Text.Perf {
         //   T:System.OutOfMemoryException:
         //     Out of memory.
         public StringBuilder Append(char value, int repeatCount) {
-            _performanceObject.Append(value, repeatCount);
+            performanceObject.Append(value, repeatCount);
             return this;
         }
 
@@ -137,7 +143,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(bool value) {
-            _performanceObject.Append(value);
+            performanceObject.Append(value);
             return this;
         }
 
@@ -156,7 +162,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(char value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -177,7 +183,7 @@ namespace System.Text.Perf {
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         //[CLSCompliant(false)]
         public StringBuilder Append(ulong value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -198,7 +204,7 @@ namespace System.Text.Perf {
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         //[CLSCompliant(false)]
         public StringBuilder Append(uint value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -218,7 +224,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(byte value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -248,7 +254,7 @@ namespace System.Text.Perf {
         //     is greater than the length of value. -or- Enlarging the value of this instance
         //     would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(string value, int startIndex, int count) {
-			_performanceObject.Append(value, startIndex, count);
+			performanceObject.Append(value, startIndex, count);
 
 			return this;
 		}
@@ -267,7 +273,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(string value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -287,7 +293,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(float value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -308,7 +314,7 @@ namespace System.Text.Perf {
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         //[CLSCompliant(false)]
         public StringBuilder Append(ushort value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -327,7 +333,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(object value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -347,7 +353,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(char[] value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -378,7 +384,7 @@ namespace System.Text.Perf {
         //     + charCount is greater than the length of value. -or- Enlarging the value of
         //     this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(char[] value, int startIndex, int charCount) {
-			_performanceObject.Append(value, startIndex, charCount);
+			performanceObject.Append(value, startIndex, charCount);
 
 			return this;
 		}
@@ -399,7 +405,7 @@ namespace System.Text.Perf {
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         //[CLSCompliant(false)]
         public StringBuilder Append(sbyte value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -418,7 +424,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(decimal value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -446,7 +452,7 @@ namespace System.Text.Perf {
         //     value is a null pointer.
         //[CLSCompliant(false)]
         public unsafe StringBuilder Append(char* value, int valueCount) {
-			_performanceObject.Append(value, valueCount);
+			performanceObject.Append(value, valueCount);
 
 			return this;
 		}
@@ -466,7 +472,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(short value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}        //
@@ -485,7 +491,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(int value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -505,7 +511,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(long value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -525,7 +531,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Append(double value) {
-			_performanceObject.Append(value);
+			performanceObject.Append(value);
 
 			return this;
 		}
@@ -562,7 +568,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     The length of the expanded string would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder AppendFormat(IFormatProvider provider, string format, object arg0) {
-			_performanceObject.AppendFormat(provider, format, arg0);
+			performanceObject.AppendFormat(provider, format, arg0);
 
 			return this;
 		}
@@ -603,7 +609,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     The length of the expanded string would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder AppendFormat(IFormatProvider provider, string format, object arg0, object arg1) {
-			_performanceObject.AppendFormat(provider, format, arg0, arg1);
+			performanceObject.AppendFormat(provider, format, arg0, arg1);
 
 			return this;
 		}
@@ -641,7 +647,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     The length of the expanded string would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder AppendFormat(IFormatProvider provider, string format, params object[] args) {
-			_performanceObject.AppendFormat(provider, format, args);
+			performanceObject.AppendFormat(provider, format, args);
 
 			return this;
 		}
@@ -673,7 +679,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     The length of the expanded string would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder AppendFormat(string format, object arg0) {
-			_performanceObject.AppendFormat(format, arg0);
+			performanceObject.AppendFormat(format, arg0);
 
 			return this;
 		}
@@ -708,7 +714,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     The length of the expanded string would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder AppendFormat(string format, object arg0, object arg1) {
-			_performanceObject.AppendFormat(format, arg0, arg1);
+			performanceObject.AppendFormat(format, arg0, arg1);
 
 			return this;
 		}
@@ -746,7 +752,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     The length of the expanded string would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder AppendFormat(string format, object arg0, object arg1, object arg2) {
-			_performanceObject.AppendFormat(format, arg0, arg1, arg2);
+			performanceObject.AppendFormat(format, arg0, arg1, arg2);
 
 			return this;
 		}
@@ -778,7 +784,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     The length of the expanded string would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder AppendFormat(string format, params object[] args) {
-			_performanceObject.AppendFormat(format, args);
+			performanceObject.AppendFormat(format, args);
 
 			return this;
 		}
@@ -822,7 +828,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     The length of the expanded string would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder AppendFormat(IFormatProvider provider, string format, object arg0, object arg1, object arg2) {
-			_performanceObject.AppendFormat(provider, format, arg0, arg1, arg2);
+			performanceObject.AppendFormat(provider, format, arg0, arg1, arg2);
 
 			return this;
 		}
@@ -838,7 +844,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder AppendLine() {
-			_performanceObject.AppendLine();
+			performanceObject.AppendLine();
 
 			return this;
 		}
@@ -858,7 +864,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder AppendLine(string value) {
-			_performanceObject.AppendLine(value);
+			performanceObject.AppendLine(value);
 
 			return this;
 		}
@@ -870,7 +876,7 @@ namespace System.Text.Perf {
         // Returns:
         //     An object whose System.Text.StringBuilder.Length is 0 (zero).
         public StringBuilder Clear() {
-			_performanceObject.Clear();
+			performanceObject.Clear();
 
 			return this;
 		}
@@ -906,7 +912,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentException:
         //     sourceIndex + count is greater than the length of this instance. -or- destinationIndex
         //     + count is greater than the length of destination.
-        public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) => _performanceObject.CopyTo(sourceIndex, destination, destinationIndex, count);
+        public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) => performanceObject.CopyTo(sourceIndex, destination, destinationIndex, count);
 
         //
         // Summary:
@@ -924,7 +930,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     capacity is less than zero. -or- Enlarging the value of this instance would exceed
         //     System.Text.StringBuilder.MaxCapacity.
-        public int EnsureCapacity(int capacity) => _performanceObject.EnsureCapacity(capacity);
+        public int EnsureCapacity(int capacity) => performanceObject.EnsureCapacity(capacity);
 
         //
         // Summary:
@@ -937,7 +943,7 @@ namespace System.Text.Perf {
         // Returns:
         //     true if this instance and sb have equal string, System.Text.StringBuilder.Capacity,
         //     and System.Text.StringBuilder.MaxCapacity values; otherwise, false.
-        public bool Equals(StringBuilder sb) => _performanceObject.Equals(sb);
+        public bool Equals(StringBuilder sb) => performanceObject.Equals(sb);
 
         //
         // Summary:
@@ -969,7 +975,7 @@ namespace System.Text.Perf {
         //     the length of this instance. -or- startIndex plus charCount is not a position
         //     within value. -or- Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, char[] value, int startIndex, int charCount) {
-			_performanceObject.Insert(index, value, startIndex, charCount);
+			performanceObject.Insert(index, value, startIndex, charCount);
 
 			return this;
 		}
@@ -995,7 +1001,7 @@ namespace System.Text.Perf {
         //   T:System.OutOfMemoryException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, bool value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1021,7 +1027,7 @@ namespace System.Text.Perf {
         //   T:System.OutOfMemoryException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, byte value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1048,7 +1054,7 @@ namespace System.Text.Perf {
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         //[CLSCompliant(false)]
         public StringBuilder Insert(int index, ulong value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1072,7 +1078,7 @@ namespace System.Text.Perf {
         //     index is less than zero or greater than the length of this instance. -or- Enlarging
         //     the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, char[] value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1099,7 +1105,7 @@ namespace System.Text.Perf {
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         //[CLSCompliant(false)]
         public StringBuilder Insert(int index, ushort value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1130,7 +1136,7 @@ namespace System.Text.Perf {
         //     The current length of this System.Text.StringBuilder object plus the length of
         //     value times count exceeds System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, string value, int count) {
-			_performanceObject.Insert(index, value, count);
+			performanceObject.Insert(index, value, count);
 
 			return this;
 		}
@@ -1154,7 +1160,7 @@ namespace System.Text.Perf {
         //     index is less than zero or greater than the length of this instance. -or- Enlarging
         //     the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, char value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1181,7 +1187,7 @@ namespace System.Text.Perf {
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         //[CLSCompliant(false)]
         public StringBuilder Insert(int index, uint value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1208,7 +1214,7 @@ namespace System.Text.Perf {
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         //[CLSCompliant(false)]
         public StringBuilder Insert(int index, sbyte value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1234,7 +1240,7 @@ namespace System.Text.Perf {
         //   T:System.OutOfMemoryException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, object value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1260,7 +1266,7 @@ namespace System.Text.Perf {
         //   T:System.OutOfMemoryException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, long value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1286,7 +1292,7 @@ namespace System.Text.Perf {
         //   T:System.OutOfMemoryException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, int value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1312,7 +1318,7 @@ namespace System.Text.Perf {
         //   T:System.OutOfMemoryException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, short value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1338,7 +1344,7 @@ namespace System.Text.Perf {
         //   T:System.OutOfMemoryException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, double value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1364,7 +1370,7 @@ namespace System.Text.Perf {
         //   T:System.OutOfMemoryException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, decimal value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1390,7 +1396,7 @@ namespace System.Text.Perf {
         //   T:System.OutOfMemoryException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, float value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1414,7 +1420,7 @@ namespace System.Text.Perf {
         //     -or- The current length of this System.Text.StringBuilder object plus the length
         //     of value exceeds System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Insert(int index, string value) {
-			_performanceObject.Insert(index, value);
+			performanceObject.Insert(index, value);
 
 			return this;
 		}
@@ -1436,7 +1442,7 @@ namespace System.Text.Perf {
         //     If startIndex or length is less than zero, or startIndex + length is greater
         //     than the length of this instance.
         public StringBuilder Remove(int startIndex, int length) {
-			_performanceObject.Remove(startIndex, length);
+			performanceObject.Remove(startIndex, length);
 
 			return this;
 		}
@@ -1455,7 +1461,7 @@ namespace System.Text.Perf {
         // Returns:
         //     A reference to this instance with oldChar replaced by newChar.
         public StringBuilder Replace(char oldChar, char newChar) {
-			_performanceObject.Replace(oldChar, newChar);
+			performanceObject.Replace(oldChar, newChar);
 
 			return this;
 		}
@@ -1486,7 +1492,7 @@ namespace System.Text.Perf {
         //     startIndex + count is greater than the length of the value of this instance.
         //     -or- startIndex or count is less than zero.
         public StringBuilder Replace(char oldChar, char newChar, int startIndex, int count) {
-			_performanceObject.Replace(oldChar, newChar, startIndex, count);
+			performanceObject.Replace(oldChar, newChar, startIndex, count);
 
 			return this;
 		}
@@ -1515,7 +1521,7 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     Enlarging the value of this instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Replace(string oldValue, string newValue) {
-			_performanceObject.Replace(oldValue, newValue);
+			performanceObject.Replace(oldValue, newValue);
 
 			return this;
 		}
@@ -1553,7 +1559,7 @@ namespace System.Text.Perf {
         //     character position not within this instance. -or- Enlarging the value of this
         //     instance would exceed System.Text.StringBuilder.MaxCapacity.
         public StringBuilder Replace(string oldValue, string newValue, int startIndex, int count) {
-			_performanceObject.Replace(oldValue, newValue, startIndex, count);
+			performanceObject.Replace(oldValue, newValue, startIndex, count);
 
 			return this;
 		}
@@ -1563,7 +1569,7 @@ namespace System.Text.Perf {
         //
         // Returns:
         //     A string whose value is the same as this instance.
-        public override string ToString() => _performanceObject.ToString();
+        public override string ToString() => performanceObject.ToString();
 
         //
         // Summary:
@@ -1583,14 +1589,17 @@ namespace System.Text.Perf {
         //   T:System.ArgumentOutOfRangeException:
         //     startIndex or length is less than zero. -or- The sum of startIndex and length
         //     is greater than the length of the current instance.
-        public string ToString(int startIndex, int length) => _performanceObject.ToString(startIndex, length);
+        public string ToString(int startIndex, int length) => performanceObject.ToString(startIndex, length);
 
-        public const bool DoNotLeaveObjectContents = true;
+        public const bool DoNotLeaveObjectContents = false;
         public override void Dispose() => Dispose(DoNotLeaveObjectContents);
 
         internal void Dispose(bool leavePooledObjectContents) {
             if (!leavePooledObjectContents) {
-                _performanceObject.Clear();
+                Clear();
+                //if (_hasCapacity) {
+                //    performanceObject.Length = _capacity.Value;
+                //}
             }
             
             // Only need to Dispose if it's been allocated from the pool.
@@ -1603,8 +1612,8 @@ namespace System.Text.Perf {
             return new StringBuilderPooledObjectPolicy(_capacity, _maximumRetainedCapacity);
         }
 
-        protected override int getPolicyHashCode() {
-            int hashCode = -686918596;
+        public override int GetHashCode() {
+            var hashCode = base.GetHashCode();
             
             hashCode = hashCode * -1521134295 + _capacity.GetHashCode();
             hashCode = hashCode * -1521134295 + _maximumRetainedCapacity.GetHashCode();
@@ -1636,7 +1645,12 @@ namespace System.Text.Perf {
 
             public override Text.StringBuilder Create() {
                 if (InitialCapacity.HasValue) {
-                    return new Text.StringBuilder(InitialCapacity.Value);
+                    var builder = new Text.StringBuilder(InitialCapacity.Value);
+
+                    // If Length not set, then char array allocations will still happen under the hood.
+                    builder.Length = InitialCapacity.Value;
+
+                    return builder;
                 }
                 
                 return new Text.StringBuilder();

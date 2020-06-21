@@ -69,7 +69,7 @@ namespace System.Text.RegularExpressions.Perf {
         //     The maximum time interval that can elapse in a pattern-matching operation before
         //     a System.Text.RegularExpressions.RegexMatchTimeoutException is thrown, or System.Text.RegularExpressions.Regex.InfiniteMatchTimeout
         //     if time-outs are disabled.
-        public TimeSpan MatchTimeout => _performanceObject.MatchTimeout;
+        public TimeSpan MatchTimeout => performanceObject.MatchTimeout;
 
         //
         // Summary:
@@ -80,7 +80,7 @@ namespace System.Text.RegularExpressions.Perf {
         //     One or more members of the System.Text.RegularExpressions.RegexOptions enumeration
         //     that represent options that were passed to the System.Text.RegularExpressions.Regex
         //     constructor
-        public RegexOptions Options => _performanceObject.Options;
+        public RegexOptions Options => performanceObject.Options;
 
         //
         // Summary:
@@ -89,7 +89,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         // Returns:
         //     true if the regular expression searches from right to left; otherwise, false.
-        public bool RightToLeft => _performanceObject.RightToLeft;
+        public bool RightToLeft => performanceObject.RightToLeft;
 
         //
         // Summary:
@@ -97,7 +97,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         // Returns:
         //     A string array of group names.
-        public string[] GetGroupNames() => _performanceObject.GetGroupNames();
+        public string[] GetGroupNames() => performanceObject.GetGroupNames();
 
         //
         // Summary:
@@ -106,7 +106,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         // Returns:
         //     An integer array of group numbers.
-        public int[] GetGroupNumbers() => _performanceObject.GetGroupNumbers();
+        public int[] GetGroupNumbers() => performanceObject.GetGroupNumbers();
 
         //
         // Summary:
@@ -119,7 +119,7 @@ namespace System.Text.RegularExpressions.Perf {
         // Returns:
         //     A string that contains the group name associated with the specified group number.
         //     If there is no group name that corresponds to i, the method returns System.String.Empty.
-        public string GroupNameFromNumber(int i) => _performanceObject.GroupNameFromNumber(i);
+        public string GroupNameFromNumber(int i) => performanceObject.GroupNameFromNumber(i);
 
         //
         // Summary:
@@ -136,7 +136,7 @@ namespace System.Text.RegularExpressions.Perf {
         // Exceptions:
         //   T:System.ArgumentNullException:
         //     name is null.
-        public int GroupNumberFromName(string name) => _performanceObject.GroupNumberFromName(name);
+        public int GroupNumberFromName(string name) => performanceObject.GroupNumberFromName(name);
 
         //
         // Summary:
@@ -156,7 +156,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public bool IsMatch(string input) => _performanceObject.IsMatch(input);
+        public bool IsMatch(string input) => performanceObject.IsMatch(input);
 
         //
         // Summary:
@@ -183,7 +183,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public bool IsMatch(string input, int startat) => _performanceObject.IsMatch(input, startat);
+        public bool IsMatch(string input, int startat) => performanceObject.IsMatch(input, startat);
 
         //
         // Summary:
@@ -203,7 +203,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public Match Match(string input) => _performanceObject.Match(input);
+        public Match Match(string input) => performanceObject.Match(input);
 
         //
         // Summary:
@@ -229,7 +229,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public Match Match(string input, int startat) => _performanceObject.Match(input, startat);
+        public Match Match(string input, int startat) => performanceObject.Match(input, startat);
 
         //
         // Summary:
@@ -262,7 +262,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public Match Match(string input, int beginning, int length) => _performanceObject.Match(input, beginning, length);
+        public Match Match(string input, int beginning, int length) => performanceObject.Match(input, beginning, length);
 
         //
         // Summary:
@@ -286,7 +286,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.ArgumentOutOfRangeException:
         //     startat is less than zero or greater than the length of input.
-        public MatchCollection Matches(string input, int startAt) => _performanceObject.Matches(input, startAt);
+        public MatchCollection Matches(string input, int startAt) => performanceObject.Matches(input, startAt);
 
         //
         // Summary:
@@ -303,7 +303,7 @@ namespace System.Text.RegularExpressions.Perf {
         // Exceptions:
         //   T:System.ArgumentNullException:
         //     input is null.
-        public MatchCollection Matches(string input) => _performanceObject.Matches(input);
+        public MatchCollection Matches(string input) => performanceObject.Matches(input);
 
         //
         // Summary:
@@ -338,7 +338,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string Replace(string input, string replacement, int count, int startAt) => _performanceObject.Replace(input, replacement, count, startAt);
+        public string Replace(string input, string replacement, int count, int startAt) => performanceObject.Replace(input, replacement, count, startAt);
 
         //
         // Summary:
@@ -366,7 +366,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string Replace(string input, MatchEvaluator evaluator) => _performanceObject.Replace(input, evaluator);
+        public string Replace(string input, MatchEvaluator evaluator) => performanceObject.Replace(input, evaluator);
 
         //
         // Summary:
@@ -395,7 +395,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string Replace(string input, string replacement, int count) => _performanceObject.Replace(input, replacement, count);
+        public string Replace(string input, string replacement, int count) => performanceObject.Replace(input, replacement, count);
 
         //
         // Summary:
@@ -432,7 +432,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string Replace(string input, MatchEvaluator evaluator, int count, int startAt) => _performanceObject.Replace(input, evaluator, count, startAt);
+        public string Replace(string input, MatchEvaluator evaluator, int count, int startAt) => performanceObject.Replace(input, evaluator, count, startAt);
 
         //
         // Summary:
@@ -463,7 +463,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string Replace(string input, MatchEvaluator evaluator, int count) => _performanceObject.Replace(input, evaluator, count);
+        public string Replace(string input, MatchEvaluator evaluator, int count) => performanceObject.Replace(input, evaluator, count);
 
         //
         // Summary:
@@ -489,7 +489,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string Replace(string input, string replacement) => _performanceObject.Replace(input, replacement);
+        public string Replace(string input, string replacement) => performanceObject.Replace(input, replacement);
 
         //
         // Summary:
@@ -520,7 +520,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string[] Split(string input, int count, int startAt) => _performanceObject.Split(input, count, startAt);
+        public string[] Split(string input, int count, int startAt) => performanceObject.Split(input, count, startAt);
 
         //
         // Summary:
@@ -544,7 +544,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string[] Split(string input, int count) => _performanceObject.Split(input, count);
+        public string[] Split(string input, int count) => performanceObject.Split(input, count);
 
         //
         // Summary:
@@ -565,7 +565,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string[] Split(string input) => _performanceObject.Split(input);
+        public string[] Split(string input) => performanceObject.Split(input);
 
         //
         // Summary:
@@ -573,11 +573,12 @@ namespace System.Text.RegularExpressions.Perf {
         //
         // Returns:
         //     The pattern parameter that was passed into the Regex constructor.
-        public override string ToString() => _performanceObject.ToString();
+        public override string ToString() => performanceObject.ToString();
 
-        protected override int getPolicyHashCode() {
-            var hashCode = _pattern.GetHashCode();
+        public override int GetHashCode() {
+            var hashCode = base.GetHashCode();
 
+            hashCode = hashCode * -1521134295 + _pattern.GetHashCode();
             hashCode = hashCode * -1521134295 + _options.GetHashCode();
             hashCode = hashCode * -1521134295 + _matchTimeout.GetHashCode();
 

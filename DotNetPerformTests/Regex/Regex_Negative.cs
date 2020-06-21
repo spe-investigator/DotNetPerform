@@ -10,7 +10,7 @@ namespace DotNetPerformTests.StringBuilder {
         [InlineData(20)]
         [InlineData(100)]
         public void PoolSizeExceeded(int poolSize) {
-            using (var test = new SpeDotNetPerform.Performance.PerformanceBaseTest<Text.StringBuilder>()) {
+            using (var test = new SpeDotNetPerform.Performance.PoolBoy<Text.StringBuilder>()) {
                 Text.Perf.StringBuilder priorStringBuilder = null;
                 var created = 0;
 
@@ -20,7 +20,7 @@ namespace DotNetPerformTests.StringBuilder {
                     stringBuilder.IsPoolAllocated.Should().BeTrue();
 
                     if (priorStringBuilder != null) {
-                        stringBuilder._performanceObject.Should().NotBeSameAs(priorStringBuilder._performanceObject);
+                        stringBuilder.performanceObject.Should().NotBeSameAs(priorStringBuilder.performanceObject);
                     }
 
                     created++;
