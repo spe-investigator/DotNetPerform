@@ -7,7 +7,7 @@ namespace DotNetPerformCli {
             var benchmark = new StringBuilder_Performance() {
                 Concats = 20,
                 Capacity = 201,
-                Iters = 100000000
+                Iters = 50000000
             };
             benchmark.WarmupPool();
 

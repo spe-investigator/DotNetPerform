@@ -9,10 +9,21 @@ namespace System.Text.RegularExpressions.Perf {
     /// <summary>
     /// Represents an immutable regular expression.
     /// </summary>
-    public class Regex : PerformanceBase<System.Text.RegularExpressions.Regex> {
+    public struct Regex : IDisposable {
         private readonly string _pattern;
-        private readonly RegexOptions? _options = null;
-        private readonly TimeSpan? _matchTimeout = null;
+        private readonly RegexOptions? _options;
+        private readonly TimeSpan? _matchTimeout;
+
+        internal ObjectWrapper<Text.RegularExpressions.Regex> wrapperObject;
+
+        public string PoolKey { get; }
+        public int PoolSize { get; }
+
+        public bool IsPoolAllocated;
+
+        internal DefaultObjectPool<Text.RegularExpressions.Regex> _objectPool;
+
+        internal Text.RegularExpressions.Regex performanceObject;
 
         /// <summary>
         /// Initializes a new instance of the System.Text.RegularExpressions.Regex class
@@ -22,9 +33,6 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentException">A regular expression parsing error occurred.</exception>
         /// <exception cref="System.ArgumentNullException">pattern is null.</exception>
         public Regex(string pattern, string poolKey = null, int? poolSize = null) : this(pattern, null, null, poolKey, poolSize) {
-            if (string.IsNullOrEmpty(pattern))
-                throw new ArgumentNullException(nameof(pattern));
-            _pattern = pattern;
         }
 
         /// <summary>
@@ -53,12 +61,44 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentOutOfRangeException:">
         /// options is not a valid System.Text.RegularExpressions.RegexOptions value. -or- matchTimeout is negative, zero, or greater than approximately 24 days.
         /// </exception>
-        public Regex(string pattern, RegexOptions? options, TimeSpan? matchTimeout, string poolKey = null, int? poolSize = null) : base(poolKey, poolSize) {
+        public Regex(string pattern, RegexOptions? options, TimeSpan? matchTimeout, string poolKey = null, int? poolSize = null) {
             if (string.IsNullOrEmpty(pattern))
                 throw new ArgumentNullException(nameof(pattern));
             _pattern = pattern;
             _options = options;
             _matchTimeout = matchTimeout;
+
+            PoolKey = poolKey;
+            PoolSize = !poolSize.HasValue ? Environment.ProcessorCount * 2 : poolSize.Value;
+
+            var policyHashCode = GetPolicyHashCode(pattern, options, matchTimeout, poolKey);
+
+            performanceObject = null;
+            //hasWrapperObject = false;
+            wrapperObject = default;
+            IsPoolAllocated = false;
+            _objectPool = null;
+            if (!StaticPerformanceBase<Text.RegularExpressions.Regex>.PooledObjectPolicyFactoryCollection.ContainsKey(policyHashCode)) {
+                // Add in policy factory into collection.
+                StaticPerformanceBase<Text.RegularExpressions.Regex>.PooledObjectPolicyFactoryCollection.TryAdd(policyHashCode, getPooledObjectPolicyFactory);
+            }
+            wrapperObject = StaticPerformanceBase<Text.RegularExpressions.Regex>.GetWrapperObject(policyHashCode, PoolSize, out _objectPool);
+            performanceObject = wrapperObject.Element;
+            IsPoolAllocated = wrapperObject.Index > -1;
+        }
+
+        static int GetPolicyHashCode(string _pattern, RegexOptions? _options, TimeSpan? _matchTimeout, string poolKey) {
+            var hashCode = string.IsNullOrEmpty(poolKey) ? -686918596 : poolKey.GetHashCode();
+
+            hashCode = hashCode * -1521134295 + _pattern.GetHashCode();
+            hashCode = hashCode * -1521134295 + _options.GetHashCode();
+            hashCode = hashCode * -1521134295 + _matchTimeout.GetHashCode();
+            
+            return hashCode;
+        }
+
+        IPooledObjectPolicy<Text.RegularExpressions.Regex> getPooledObjectPolicyFactory() {
+            return new RegexPooledObjectPolicy(_pattern, _options, _matchTimeout);
         }
 
         //
@@ -585,8 +625,14 @@ namespace System.Text.RegularExpressions.Perf {
             return hashCode;
         }
 
-        protected override IPooledObjectPolicy<RegularExpressions.Regex> getPooledObjectPolicyFactory() {
-            return new RegexPooledObjectPolicy(_pattern, _options, _matchTimeout);
+        public const bool DoNotLeaveObjectContents = false;
+        public void Dispose() => Dispose(DoNotLeaveObjectContents);
+
+        internal void Dispose(bool leavePooledObjectContents) {
+            // Only need to Dispose if it's been allocated from the pool.
+            if (IsPoolAllocated) {
+                StaticPerformanceBase<Text.RegularExpressions.Regex>.Dispose(_objectPool, wrapperObject);
+            }
         }
 
         ////

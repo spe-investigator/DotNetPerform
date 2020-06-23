@@ -40,7 +40,7 @@ namespace DotNetPerformTests.StringBuilder {
         //[InlineData(10, 1000, 20)]
         public void Allocate_NonPooled(int? capacity, int? maxCapacity, int poolSize) {
             using (var test = new SpeDotNetPerform.Performance.PoolBoy<Text.StringBuilder>()) {
-                Text.Perf.StringBuilder priorStringBuilder = null;
+                Text.Perf.StringBuilder? priorStringBuilder = null;
                 var created = 0;
                 var contents = string.Join(',', Enumerable.Repeat("I want to test this out", 100));
 
@@ -51,7 +51,7 @@ namespace DotNetPerformTests.StringBuilder {
                     stringBuilder.IsPoolAllocated.Should().BeTrue();
 
                     if (priorStringBuilder != null) {
-                        stringBuilder.performanceObject.Should().NotBeSameAs(priorStringBuilder.performanceObject);
+                        stringBuilder.performanceObject.Should().NotBeSameAs(priorStringBuilder.Value.performanceObject);
                     }
 
                     created++;

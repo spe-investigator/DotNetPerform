@@ -31,7 +31,7 @@ namespace DotNetPerformTests.StringBuilder {
         [InlineData(20)]
         public void Allocate_NonPooled(int poolSize) {
             using (var test = new SpeDotNetPerform.Performance.PoolBoy<Text.RegularExpressions.Regex>()) {
-                Text.RegularExpressions.Perf.Regex priorRegexNumbers = null;
+                Text.RegularExpressions.Perf.Regex? priorRegexNumbers = null;
                 const string numbersRegexPattern = "[0-9]+";
                 var created = 0;
 
@@ -40,7 +40,7 @@ namespace DotNetPerformTests.StringBuilder {
                     regexNumbers.IsPoolAllocated.Should().BeTrue();
 
                     if (priorRegexNumbers != null) {
-                        regexNumbers.performanceObject.Should().NotBeSameAs(priorRegexNumbers.performanceObject);
+                        regexNumbers.performanceObject.Should().NotBeSameAs(priorRegexNumbers.Value.performanceObject);
                     }
 
                     created++;

@@ -67,7 +67,7 @@ namespace System.Performance {
             }
             
             PoolKey = poolKey;
-            PoolSize = !poolSize.HasValue ? Environment.ProcessorCount * 2 : poolSize.Value;   
+            PoolSize = !poolSize.HasValue ? Environment.ProcessorCount * 2 : poolSize.Value;
         }
 
         public override int GetHashCode() {
