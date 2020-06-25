@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SpeDotNetPerform.Performance {
+﻿namespace System.Performance {
     public abstract class PooledObjectPolicy<T> : IPooledObjectPolicy<T> {
         public abstract bool OptimisticObjectCreation { get; }
 

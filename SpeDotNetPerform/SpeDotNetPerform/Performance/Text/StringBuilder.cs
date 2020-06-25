@@ -1,21 +1,18 @@
-﻿using SpeDotNetPerform.Performance;
-using System.Performance;
-
-namespace System.Text.Perf {
+﻿namespace System.Performance.Text {
     public struct StringBuilder : IDisposable {
         private readonly int? _maximumRetainedCapacity;
         private readonly int? _capacity;
 
-        internal ObjectWrapper<Text.StringBuilder> wrapperObject;
+        internal ObjectWrapper<System.Text.StringBuilder> wrapperObject;
 
         public string PoolKey { get; }
         public int PoolSize { get; }
 
         public bool IsPoolAllocated { get; }
 
-        internal DefaultObjectPool<Text.StringBuilder> _objectPool;
+        internal DefaultObjectPool<System.Text.StringBuilder> _objectPool;
 
-        internal Text.StringBuilder performanceObject;
+        internal System.Text.StringBuilder performanceObject;
 
         /// <summary>
         /// Initializes a new instance of the System.Text.StringBuilder class.
@@ -61,11 +58,11 @@ namespace System.Text.Perf {
             wrapperObject = default;
             IsPoolAllocated = false;
             _objectPool = null;
-            if (!StaticPerformanceBase<Text.StringBuilder>.PooledObjectPolicyFactoryCollection.ContainsKey(policyHashCode)) {
+            if (!StaticPerformanceBase<System.Text.StringBuilder>.PooledObjectPolicyFactoryCollection.ContainsKey(policyHashCode)) {
                 // Add in policy factory into collection.
-                StaticPerformanceBase<Text.StringBuilder>.PooledObjectPolicyFactoryCollection.TryAdd(policyHashCode, getPooledObjectPolicyFactory);
+                StaticPerformanceBase<System.Text.StringBuilder>.PooledObjectPolicyFactoryCollection.TryAdd(policyHashCode, getPooledObjectPolicyFactory);
             }
-            wrapperObject = StaticPerformanceBase<Text.StringBuilder>.GetWrapperObject(policyHashCode, PoolSize, out _objectPool);
+            wrapperObject = StaticPerformanceBase<System.Text.StringBuilder>.GetWrapperObject(policyHashCode, PoolSize, out _objectPool);
             performanceObject = wrapperObject.Element;
             IsPoolAllocated = wrapperObject.Index > -1;
         }
@@ -79,7 +76,7 @@ namespace System.Text.Perf {
             return hashCode;
         }
 
-        IPooledObjectPolicy<Text.StringBuilder> getPooledObjectPolicyFactory() {
+        IPooledObjectPolicy<System.Text.StringBuilder> getPooledObjectPolicyFactory() {
             return new StringBuilderPooledObjectPolicy(_capacity, _maximumRetainedCapacity);
         }
 
@@ -1637,7 +1634,7 @@ namespace System.Text.Perf {
             
             // Only need to Dispose if it's been allocated from the pool.
             if (IsPoolAllocated) {
-                StaticPerformanceBase<Text.StringBuilder>.Dispose(_objectPool, wrapperObject);
+                StaticPerformanceBase<System.Text.StringBuilder>.Dispose(_objectPool, wrapperObject);
             }
         }
 
@@ -1652,7 +1649,7 @@ namespace System.Text.Perf {
     }
 
 
-    public class StringBuilderPooledObjectPolicy : PooledObjectPolicy<Text.StringBuilder> {
+    public class StringBuilderPooledObjectPolicy : PooledObjectPolicy<System.Text.StringBuilder> {
         /// <summary>
         /// Default InitialCapacity is 100.
         /// </summary>
@@ -1674,9 +1671,9 @@ namespace System.Text.Perf {
             MaximumRetainedCapacity = maximumRetainedCapacity;
         }
 
-        public override Text.StringBuilder Create() {
+        public override System.Text.StringBuilder Create() {
             if (InitialCapacity.HasValue) {
-                var builder = new Text.StringBuilder(InitialCapacity.Value);
+                var builder = new System.Text.StringBuilder(InitialCapacity.Value);
 
                 // If Length not set, then char array allocations will still happen under the hood.
                 builder.Length = InitialCapacity.Value;
@@ -1684,7 +1681,7 @@ namespace System.Text.Perf {
                 return builder;
             }
 
-            return new Text.StringBuilder();
+            return new System.Text.StringBuilder();
         }
 
         public override bool Equals(object obj) {
@@ -1702,7 +1699,7 @@ namespace System.Text.Perf {
             return hashCode;
         }
 
-        public override bool ShouldReturn(Text.StringBuilder obj) {
+        public override bool ShouldReturn(System.Text.StringBuilder obj) {
             // TODO: Should consider this logic to be the opposite of what it is now.
             if (MaximumRetainedCapacity.HasValue && obj.Capacity > MaximumRetainedCapacity) {
                 // Too big. Discard this one.

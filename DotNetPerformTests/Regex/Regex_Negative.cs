@@ -2,6 +2,7 @@ using System;
 using Text = System.Text;
 using Xunit;
 using FluentAssertions;
+using Perf = System.Performance;
 
 namespace DotNetPerformTests.StringBuilder {
     [Collection("Sequential")]
@@ -10,12 +11,12 @@ namespace DotNetPerformTests.StringBuilder {
         [InlineData(20)]
         [InlineData(100)]
         public void PoolSizeExceeded(int poolSize) {
-            using (var test = new SpeDotNetPerform.Performance.PoolBoy<Text.StringBuilder>()) {
-                Text.Perf.StringBuilder? priorStringBuilder = null;
+            using (var test = new Perf.PoolBoy<Text.StringBuilder>()) {
+                Perf.Text.StringBuilder? priorStringBuilder = null;
                 var created = 0;
 
                 do {
-                    var stringBuilder = new Text.Perf.StringBuilder(poolSize: poolSize);
+                    var stringBuilder = new Perf.Text.StringBuilder(poolSize: poolSize);
                     stringBuilder.Append("I want to test this out.");
                     stringBuilder.IsPoolAllocated.Should().BeTrue();
 
@@ -27,7 +28,7 @@ namespace DotNetPerformTests.StringBuilder {
                     priorStringBuilder = stringBuilder;
                 } while (created < poolSize);
 
-                var afterPoolSaturated = new Text.Perf.StringBuilder(poolSize: poolSize);
+                var afterPoolSaturated = new Perf.Text.StringBuilder(poolSize: poolSize);
                 afterPoolSaturated.IsPoolAllocated.Should().BeFalse();
             }
         }

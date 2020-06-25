@@ -1,29 +1,24 @@
-﻿using SpeDotNetPerform.Performance;
-using System;
-using System.Collections.Generic;
-using System.Performance;
-using System.Reflection;
-using OP = Microsoft.Extensions.ObjectPool;
+﻿using System.Collections.Generic;
 
-namespace System.Text.RegularExpressions.Perf {
+namespace System.Performance.Text.RegularExpressions {
     /// <summary>
     /// Represents an immutable regular expression.
     /// </summary>
     public struct Regex : IDisposable {
         private readonly string _pattern;
-        private readonly RegexOptions? _options;
+        private readonly System.Text.RegularExpressions.RegexOptions? _options;
         private readonly TimeSpan? _matchTimeout;
 
-        internal ObjectWrapper<Text.RegularExpressions.Regex> wrapperObject;
+        internal ObjectWrapper<System.Text.RegularExpressions.Regex> wrapperObject;
 
         public string PoolKey { get; }
         public int PoolSize { get; }
 
         public bool IsPoolAllocated;
 
-        internal DefaultObjectPool<Text.RegularExpressions.Regex> _objectPool;
+        internal DefaultObjectPool<System.Text.RegularExpressions.Regex> _objectPool;
 
-        internal Text.RegularExpressions.Regex performanceObject;
+        internal System.Text.RegularExpressions.Regex performanceObject;
 
         /// <summary>
         /// Initializes a new instance of the System.Text.RegularExpressions.Regex class
@@ -44,7 +39,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentException">A regular expression parsing error occurred.</exception>
         /// <exception cref="System.ArgumentNullException">pattern is null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException:">options contains an invalid flag.</exception>
-        public Regex(string pattern, RegexOptions options, string poolKey = null, int? poolSize = null) : this(pattern, options, null, poolKey, poolSize) {
+        public Regex(string pattern, System.Text.RegularExpressions.RegexOptions options, string poolKey = null, int? poolSize = null) : this(pattern, options, null, poolKey, poolSize) {
         }
 
         /// <summary>
@@ -61,7 +56,7 @@ namespace System.Text.RegularExpressions.Perf {
         /// <exception cref="System.ArgumentOutOfRangeException:">
         /// options is not a valid System.Text.RegularExpressions.RegexOptions value. -or- matchTimeout is negative, zero, or greater than approximately 24 days.
         /// </exception>
-        public Regex(string pattern, RegexOptions? options, TimeSpan? matchTimeout, string poolKey = null, int? poolSize = null) {
+        public Regex(string pattern, System.Text.RegularExpressions.RegexOptions? options, TimeSpan? matchTimeout, string poolKey = null, int? poolSize = null) {
             if (string.IsNullOrEmpty(pattern))
                 throw new ArgumentNullException(nameof(pattern));
             _pattern = pattern;
@@ -78,16 +73,16 @@ namespace System.Text.RegularExpressions.Perf {
             wrapperObject = default;
             IsPoolAllocated = false;
             _objectPool = null;
-            if (!StaticPerformanceBase<Text.RegularExpressions.Regex>.PooledObjectPolicyFactoryCollection.ContainsKey(policyHashCode)) {
+            if (!StaticPerformanceBase<System.Text.RegularExpressions.Regex>.PooledObjectPolicyFactoryCollection.ContainsKey(policyHashCode)) {
                 // Add in policy factory into collection.
-                StaticPerformanceBase<Text.RegularExpressions.Regex>.PooledObjectPolicyFactoryCollection.TryAdd(policyHashCode, getPooledObjectPolicyFactory);
+                StaticPerformanceBase<System.Text.RegularExpressions.Regex>.PooledObjectPolicyFactoryCollection.TryAdd(policyHashCode, getPooledObjectPolicyFactory);
             }
-            wrapperObject = StaticPerformanceBase<Text.RegularExpressions.Regex>.GetWrapperObject(policyHashCode, PoolSize, out _objectPool);
+            wrapperObject = StaticPerformanceBase<System.Text.RegularExpressions.Regex>.GetWrapperObject(policyHashCode, PoolSize, out _objectPool);
             performanceObject = wrapperObject.Element;
             IsPoolAllocated = wrapperObject.Index > -1;
         }
 
-        static int GetPolicyHashCode(string _pattern, RegexOptions? _options, TimeSpan? _matchTimeout, string poolKey) {
+        static int GetPolicyHashCode(string _pattern, System.Text.RegularExpressions.RegexOptions? _options, TimeSpan? _matchTimeout, string poolKey) {
             var hashCode = string.IsNullOrEmpty(poolKey) ? -686918596 : poolKey.GetHashCode();
 
             hashCode = hashCode * -1521134295 + _pattern.GetHashCode();
@@ -97,7 +92,7 @@ namespace System.Text.RegularExpressions.Perf {
             return hashCode;
         }
 
-        IPooledObjectPolicy<Text.RegularExpressions.Regex> getPooledObjectPolicyFactory() {
+        IPooledObjectPolicy<System.Text.RegularExpressions.Regex> getPooledObjectPolicyFactory() {
             return new RegexPooledObjectPolicy(_pattern, _options, _matchTimeout);
         }
 
@@ -120,7 +115,7 @@ namespace System.Text.RegularExpressions.Perf {
         //     One or more members of the System.Text.RegularExpressions.RegexOptions enumeration
         //     that represent options that were passed to the System.Text.RegularExpressions.Regex
         //     constructor
-        public RegexOptions Options => performanceObject.Options;
+        public System.Text.RegularExpressions.RegexOptions Options => performanceObject.Options;
 
         //
         // Summary:
@@ -243,7 +238,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public Match Match(string input) => performanceObject.Match(input);
+        public System.Text.RegularExpressions.Match Match(string input) => performanceObject.Match(input);
 
         //
         // Summary:
@@ -269,7 +264,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public Match Match(string input, int startat) => performanceObject.Match(input, startat);
+        public System.Text.RegularExpressions.Match Match(string input, int startat) => performanceObject.Match(input, startat);
 
         //
         // Summary:
@@ -302,7 +297,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public Match Match(string input, int beginning, int length) => performanceObject.Match(input, beginning, length);
+        public System.Text.RegularExpressions.Match Match(string input, int beginning, int length) => performanceObject.Match(input, beginning, length);
 
         //
         // Summary:
@@ -326,7 +321,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.ArgumentOutOfRangeException:
         //     startat is less than zero or greater than the length of input.
-        public MatchCollection Matches(string input, int startAt) => performanceObject.Matches(input, startAt);
+        public System.Text.RegularExpressions.MatchCollection Matches(string input, int startAt) => performanceObject.Matches(input, startAt);
 
         //
         // Summary:
@@ -343,7 +338,7 @@ namespace System.Text.RegularExpressions.Perf {
         // Exceptions:
         //   T:System.ArgumentNullException:
         //     input is null.
-        public MatchCollection Matches(string input) => performanceObject.Matches(input);
+        public System.Text.RegularExpressions.MatchCollection Matches(string input) => performanceObject.Matches(input);
 
         //
         // Summary:
@@ -406,7 +401,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string Replace(string input, MatchEvaluator evaluator) => performanceObject.Replace(input, evaluator);
+        public string Replace(string input, System.Text.RegularExpressions.MatchEvaluator evaluator) => performanceObject.Replace(input, evaluator);
 
         //
         // Summary:
@@ -472,7 +467,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string Replace(string input, MatchEvaluator evaluator, int count, int startAt) => performanceObject.Replace(input, evaluator, count, startAt);
+        public string Replace(string input, System.Text.RegularExpressions.MatchEvaluator evaluator, int count, int startAt) => performanceObject.Replace(input, evaluator, count, startAt);
 
         //
         // Summary:
@@ -503,7 +498,7 @@ namespace System.Text.RegularExpressions.Perf {
         //
         //   T:System.Text.RegularExpressions.RegexMatchTimeoutException:
         //     A time-out occurred. For more information about time-outs, see the Remarks section.
-        public string Replace(string input, MatchEvaluator evaluator, int count) => performanceObject.Replace(input, evaluator, count);
+        public string Replace(string input, System.Text.RegularExpressions.MatchEvaluator evaluator, int count) => performanceObject.Replace(input, evaluator, count);
 
         //
         // Summary:
@@ -631,7 +626,7 @@ namespace System.Text.RegularExpressions.Perf {
         internal void Dispose(bool leavePooledObjectContents) {
             // Only need to Dispose if it's been allocated from the pool.
             if (IsPoolAllocated) {
-                StaticPerformanceBase<Text.RegularExpressions.Regex>.Dispose(_objectPool, wrapperObject);
+                StaticPerformanceBase<System.Text.RegularExpressions.Regex>.Dispose(_objectPool, wrapperObject);
             }
         }
 
@@ -670,35 +665,35 @@ namespace System.Text.RegularExpressions.Perf {
         internal class RegexPooledObjectPolicy : PooledObjectPolicy<System.Text.RegularExpressions.Regex> {
             public string Pattern { get; set; }
 
-            public RegexOptions? Options { get; }
+            public System.Text.RegularExpressions.RegexOptions? Options { get; }
 
             public TimeSpan? MatchTimeout { get; }
 
             public override bool OptimisticObjectCreation { get; } = true;
 
-            public RegexPooledObjectPolicy(string pattern, RegexOptions? options = null, TimeSpan? matchTimeout = null) {
+            public RegexPooledObjectPolicy(string pattern, System.Text.RegularExpressions.RegexOptions? options = null, TimeSpan? matchTimeout = null) {
                 Pattern = pattern;
                 Options = options;
                 MatchTimeout = matchTimeout;
             }
 
-            public override RegularExpressions.Regex Create() {
+            public override System.Text.RegularExpressions.Regex Create() {
                 if (MatchTimeout.HasValue) {
                     if (!Options.HasValue) {
                         throw new ArgumentNullException(nameof(Options));
                     }
                     
-                    return new RegularExpressions.Regex(Pattern, Options.Value, MatchTimeout.Value);
+                    return new System.Text.RegularExpressions.Regex(Pattern, Options.Value, MatchTimeout.Value);
                 }
 
                 if (Options.HasValue) {
-                    return new RegularExpressions.Regex(Pattern, Options.Value, MatchTimeout.Value);
+                    return new System.Text.RegularExpressions.Regex(Pattern, Options.Value, MatchTimeout.Value);
                 }
 
-                return new RegularExpressions.Regex(Pattern);
+                return new System.Text.RegularExpressions.Regex(Pattern);
             }
 
-            public override bool ShouldReturn(RegularExpressions.Regex obj) {
+            public override bool ShouldReturn(System.Text.RegularExpressions.Regex obj) {
                 // Do nothing.
                 return true;
             }

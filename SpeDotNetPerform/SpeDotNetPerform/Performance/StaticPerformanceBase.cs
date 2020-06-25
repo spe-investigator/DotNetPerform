@@ -1,5 +1,4 @@
-﻿using SpeDotNetPerform.Performance;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Linq;
 
 namespace System.Performance {
@@ -9,7 +8,7 @@ namespace System.Performance {
         public static ConcurrentDictionary<int, GetPooledObjectPolicyFactory<T>> PooledObjectPolicyFactoryCollection { get;set; }
 
         static ConcurrentDictionary<int, DefaultObjectPool<T>> _objectPoolCollection;
-        static ConcurrentDictionary<int, DefaultObjectPool<T>> objectPoolCollection {
+        internal static ConcurrentDictionary<int, DefaultObjectPool<T>> objectPoolCollection {
             get {
                 if (_objectPoolCollection == null) {
                     _objectPoolCollection = new ConcurrentDictionary<int, DefaultObjectPool<T>>();
@@ -64,6 +63,7 @@ namespace System.Performance {
         }
 
         static internal void reset() {
+            _objectPoolCollection.Clear();
             _objectPoolCollection = null;
         }
     }

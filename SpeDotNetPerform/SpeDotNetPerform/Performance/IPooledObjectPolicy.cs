@@ -1,6 +1,6 @@
 ﻿using OP = Microsoft.Extensions.ObjectPool;
 
-namespace SpeDotNetPerform.Performance {
+namespace System.Performance {
     //
     // Summary:
     //     Represents a policy for managing pooled objects.

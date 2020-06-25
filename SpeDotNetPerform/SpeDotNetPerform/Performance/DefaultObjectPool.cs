@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
-namespace SpeDotNetPerform.Performance {
+namespace System.Performance {
     public class DefaultObjectPool<T> where T : class {
         internal protected readonly ObjectWrapper<T>[] _items;
         private protected readonly IPooledObjectPolicy<T> _policy;
