@@ -1,4 +1,6 @@
-﻿namespace System.Performance {
+﻿using System.Dynamic;
+
+namespace System.Performance {
     public abstract class PooledObjectPolicy<T> : IPooledObjectPolicy<T> {
         public abstract bool OptimisticObjectCreation { get; }
 

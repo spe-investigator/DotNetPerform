@@ -63,8 +63,10 @@ namespace System.Performance {
         }
 
         static internal void reset() {
-            _objectPoolCollection.Clear();
-            _objectPoolCollection = null;
+            if (_objectPoolCollection != null) {
+                _objectPoolCollection.Clear();
+                _objectPoolCollection = null;
+            }
         }
     }
 }

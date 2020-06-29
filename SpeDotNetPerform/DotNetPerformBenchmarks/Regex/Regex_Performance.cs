@@ -1,12 +1,15 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Text = System.Text;
 using Perf = System.Performance;
+using BenchmarkDotNet.Jobs;
 
 namespace DotNetPerformBenchmarks.StringBuilder {
-    [GcForce(false)]
-    [GcServer(true)]
-    [GcConcurrent(false)]
-    [RPlotExporter]
+    //[GcForce(false)]
+    //[GcServer(true)]
+    //[GcConcurrent(false)]
+    //[RPlotExporter]
+    //[SimpleJob(RuntimeMoniker.Net472, baseline: true)]
+    //[SimpleJob(RuntimeMoniker.NetCoreApp30)]
     public class Regex_Performance {
         public string stringAllocation = "0123456789";
 
@@ -29,7 +32,7 @@ namespace DotNetPerformBenchmarks.StringBuilder {
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void BenchmarkPooled() {
             using (var test = new Perf.PoolBoy<Text.StringBuilder>()) {
                 for (var i = 0; i < Iters; i++) {
@@ -42,7 +45,7 @@ namespace DotNetPerformBenchmarks.StringBuilder {
             }
         }
 
-        [Benchmark(Baseline = true)]
+        //[Benchmark(Baseline = true)]
         public void BenchmarkNonPooled() {
             for (var i = 0; i < Iters; i++) {
                 var regex = new Text.RegularExpressions.Regex("[0-9]+");

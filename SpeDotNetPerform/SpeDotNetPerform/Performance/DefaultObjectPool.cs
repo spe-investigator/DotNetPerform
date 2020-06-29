@@ -131,6 +131,6 @@ namespace System.Performance {
         public T Element;
         public int Index;
         public object Check;
-        //public DateTime? CheckOut;
+        public bool IsPoolAllocated => Index > -1;
     }
 }

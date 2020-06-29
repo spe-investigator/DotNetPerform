@@ -1,11 +1,11 @@
 using System;
-using Text = System.Text;
+using Txt = System.Text;
 using Xunit;
 using FluentAssertions;
 using System.Collections.Generic;
 using Perf = System.Performance;
 
-namespace DotNetPerformTests.StringBuilder {
+namespace DotNetPerformTests.Text.RegularExpressions {
     [Collection("Sequential")]
     public class Regex_Positive {
         const bool DONOTCLEAR = true;
@@ -14,7 +14,7 @@ namespace DotNetPerformTests.StringBuilder {
         [InlineData(null)]
         [InlineData("Test1")]
         public void SamePattern_SamePool(string poolKey) {
-            using (var test = new Perf.PoolBoy<Text.RegularExpressions.Regex>()) {
+            using (var test = new Perf.PoolBoy<Txt.RegularExpressions.Regex>()) {
                 const string numbersRegexPattern = "[0-9]+";
                 var regexNumbers = new Perf.Text.RegularExpressions.Regex(numbersRegexPattern, poolKey);
 
@@ -31,7 +31,7 @@ namespace DotNetPerformTests.StringBuilder {
         [InlineData(4)]
         [InlineData(20)]
         public void Allocate_NonPooled(int poolSize) {
-            using (var test = new Perf.PoolBoy<Text.RegularExpressions.Regex>()) {
+            using (var test = new Perf.PoolBoy<Txt.RegularExpressions.Regex>()) {
                 Perf.Text.RegularExpressions.Regex? priorRegexNumbers = null;
                 const string numbersRegexPattern = "[0-9]+";
                 var created = 0;

@@ -1,12 +1,15 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Text = System.Text;
 using Perf = System.Performance;
+using BenchmarkDotNet.Jobs;
 
 namespace DotNetPerformBenchmarks.StringBuilder {
     [GcForce(false)]
     [GcServer(true)]
     [GcConcurrent(false)]
     [RPlotExporter]
+    [SimpleJob(RuntimeMoniker.Net472, baseline: true)]
+    [SimpleJob(RuntimeMoniker.NetCoreApp30)]
     public class StringBuilder_Performance {
         public char[] stringAllocation = "0123456789".ToCharArray();
 
